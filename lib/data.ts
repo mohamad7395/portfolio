@@ -8,7 +8,7 @@ export const profile = {
 }
 
 export const bio = [
-  'AI/ML Engineer with 5+ years designing and deploying production-grade AI systems across natural language, agentic, and industrial domains. Specialized in LLMs, RAG, and multi-agent systems, with a track record of taking solutions from design to production on AWS.',
+  'AI/ML Engineer with 4+ years designing and deploying production-grade AI systems across natural language, agentic, and industrial domains. Specialized in LLMs, RAG, and multi-agent systems, with a track record of taking solutions from design to production on AWS.',
   'Experienced building RAG pipelines with LangChain, LangGraph, and FAISS, integrating models from OpenAI, Anthropic, and Gemini. Strong background in time-series forecasting and anomaly detection for industrial systems. Master\'s from the University of Bonn. Published at EACL 2026. Full working rights in Germany.',
 ]
 
@@ -71,12 +71,12 @@ export const experience: Experience[] = [
     period: 'Sep 2025 — Present',
     location: 'Hamburg, DE',
     points: [
-      'Led the full AI development lifecycle — design, implementation, project management, and stakeholder alignment with non-technical founders and business teams.',
-      'Architected and shipped AIME, an Agentic RAG ecosystem at aimetalent.com, cutting a multi-day manual recruitment process to minutes by automating global sourcing and matching.',
-      'Engineered a custom Agentic CV Matcher using RAG for high-precision candidate ranking via deep semantic search across massive databases.',
-      'Built autonomous AI pipelines that ingest CVs and extract standardized summaries and key skills, ensuring consistent, searchable profiles at scale.',
-      'Designed and led a custom recruitment CRM, managing two developers and automating invoicing, margin calculation, and document generation.',
-      'Owned end-to-end cloud and data architecture on AWS, with S3, MongoDB, and RDS plus external service and job-board integrations.',
+      'Led the full product lifecycle for two live AI products at DCV, owning design, implementation, delivery, and alignment with non-technical founders and business teams.',
+      'Built and shipped AIME (aimetalent.com), an agentic RAG product that cut a multi-day manual recruitment process to minutes by automating global sourcing and matching, now used daily by recruiters.',
+      'Engineered an agentic CV Matcher using RAG and deep semantic search, delivering high-precision candidate ranking and discovery across large databases.',
+      'Built an automated ETL pipeline that ingests CVs from a data lake, routes them by detected location, and uses LLMs to extract and structure profiles before loading them into vector and document databases (FAISS, MongoDB), triggered end-to-end without manual steps.',
+      'Designed and shipped a recruitment CRM with a team of two developers, covering the full lifecycle from client contact to commission payout by automating invoicing, margin calculation, and contract generation.',
+      'Owned cloud and deployment for both products on AWS, building CI/CD pipelines with Docker for automated testing and deployment to EC2 across staging and production, with data storage on S3, MongoDB, and RDS.',
     ],
   },
   {
@@ -85,10 +85,11 @@ export const experience: Experience[] = [
     period: 'Aug 2022 — Aug 2025',
     location: 'Mönchengladbach, DE',
     points: [
-      'Developed Python workflows to process high-frequency sensor data (10GB per 10-minute window), extracting compact summaries that solved storage bottlenecks while preserving critical signal.',
-      'Formulated the optimization problem mathematically and designed a custom statistical model for forecasting and anomaly detection that outperformed standard models by 30%.',
-      'Deployed the solution end-to-end with factory systems via gRPC and SQL, delivering real-time dashboards and increasing factory efficiency by 2%.',
-      'Partnered with domain experts and senior management to translate operational challenges into ML solutions, shaping the technical roadmap and retraining logic.',
+      'Built and shipped an AI product for cold-rolling mills, taking it from idea to a system used in factories today, increasing production efficiency by 2%.',
+      'Designed an ETL pipeline processing high-frequency sensor data (10GB per 10-minute window), extracting compact, high-value summaries that resolved storage bottlenecks while preserving critical information.',
+      'Developed a custom statistical forecasting and anomaly-detection model as the core of the product, outperforming standard benchmarks by 30%.',
+      'Deployed end-to-end with integration into factory systems via gRPC and SQL, delivering real-time dashboards in Grafana that served predictions and monitored model performance and data drift.',
+      'Partnered with domain experts and senior management to translate operational challenges into the product roadmap and retraining logic that improved plant-level productivity.',
     ],
   },
   {
