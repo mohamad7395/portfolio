@@ -58,7 +58,7 @@ export function Hero() {
         <Reveal delay={120}>
           <div className="relative size-28 shrink-0 overflow-hidden rounded-full border border-border sm:size-36">
             <Image
-              src="/profile.png"
+              src="/Mohammad-Akbari.jpg"
               alt={`Portrait of ${profile.name}`}
               fill
               priority
