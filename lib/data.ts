@@ -106,7 +106,7 @@ export const experience: Experience[] = [
   },
   {
     role: 'Junior Software Developer',
-    company: 'Nexus',
+    company: 'DCV Technologies',
     period: 'Jun 2019 — Jun 2021',
     location: 'London, UK',
     points: [
