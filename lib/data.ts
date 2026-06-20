@@ -2,7 +2,7 @@ export const profile = {
   name: 'Mohammad Akbari Monfared',
   role: 'AI/ML Engineer',
   tagline:
-    'AI/ML Engineer with 5+ years shipping production AI — LLMs, RAG, and multi-agent systems.',
+    'AI/ML Engineer with 4+ years shipping production AI — LLMs, RAG, and multi-agent systems.',
   github: 'https://github.com/mohamad7395',
   linkedin: 'https://www.linkedin.com/in/mohamad-akbari-6a7888229/',
 }
