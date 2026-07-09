@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { SiteNav } from '@/components/site-nav'
 import { SiteFooter } from '@/components/site-footer'
 import { Hero } from '@/components/hero'
+import { ChatSection } from '@/components/chat-section'
 import { Reveal } from '@/components/reveal'
 import { ProjectCard } from '@/components/project-card'
 import { ExperienceSection } from '@/components/experience-section'
@@ -18,6 +19,7 @@ export default function HomePage() {
       <SiteNav />
       <main className="flex-1">
         <Hero />
+        <ChatSection />
 
         <ExperienceSection />
         <EducationSection />
