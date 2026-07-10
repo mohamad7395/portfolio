@@ -4,10 +4,10 @@ import { publications } from '@/lib/data'
 
 export function PublicationsSection() {
   return (
-    <section className="mx-auto max-w-3xl lg:max-w-4xl px-4 sm:px-6 py-4">
+    <section className="mx-auto max-w-5xl px-4 sm:px-6 py-4">
       <div className="rounded-2xl bg-[#1a1a1a] border border-border p-6 sm:p-8">
       <Reveal>
-        <h2 className="mb-10 text-sm font-medium uppercase tracking-widest text-muted-foreground">
+        <h2 className="mb-10 text-base font-medium uppercase tracking-widest text-muted-foreground">
           Publications
         </h2>
       </Reveal>
@@ -22,10 +22,10 @@ export function PublicationsSection() {
               className="group flex items-start justify-between gap-4 border-t border-border py-5 transition-colors last:border-b hover:border-accent/40"
             >
               <div>
-                <h3 className="text-base font-medium text-foreground transition-colors group-hover:text-accent">
+                <h3 className="text-lg font-medium text-foreground transition-colors group-hover:text-accent">
                   {item.title}
                 </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-1 text-base text-muted-foreground">
                   {item.venue} · {item.year}
                 </p>
               </div>

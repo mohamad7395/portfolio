@@ -7,19 +7,19 @@ import { profile } from '@/lib/data'
 
 export function Hero() {
   return (
-    <section className="mx-auto max-w-3xl lg:max-w-4xl px-4 sm:px-6 pb-20 sm:pb-24 pt-16 sm:pt-20 lg:pt-28">
+    <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20 sm:pb-24 pt-16 sm:pt-20 lg:pt-28">
       <div className="flex flex-col-reverse items-start gap-10 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <Reveal>
-            <p className="mb-4 font-mono text-sm text-accent">{profile.role}</p>
+            <p className="mb-4 font-mono text-base text-accent">{profile.role}</p>
           </Reveal>
           <Reveal delay={80}>
-            <h1 className="text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+            <h1 className="text-balance text-5xl font-semibold tracking-tight text-foreground sm:text-6xl">
               {profile.name}
             </h1>
           </Reveal>
           <Reveal delay={160}>
-            <p className="mt-5 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-5 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
               {profile.tagline}
             </p>
           </Reveal>
@@ -28,7 +28,7 @@ export function Hero() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 href="/projects"
-                className="group inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                className="group inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-base font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 View projects
                 <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

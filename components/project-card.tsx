@@ -16,7 +16,7 @@ export function ProjectCard({ project }: { project: Project }) {
       </Link>
 
       <div className="relative z-10 flex items-start justify-between gap-4 pointer-events-none">
-        <h3 className="text-lg font-medium text-card-foreground">
+        <h3 className="text-xl font-medium text-card-foreground">
           {project.title}
         </h3>
         <div className="flex items-center gap-3 text-muted-foreground">
@@ -46,7 +46,7 @@ export function ProjectCard({ project }: { project: Project }) {
       </div>
 
       <div className="relative z-10 mt-3 flex-1 pointer-events-none">
-        <p className="text-pretty text-base leading-relaxed text-muted-foreground">
+        <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
           {project.description}
         </p>
 
@@ -54,7 +54,7 @@ export function ProjectCard({ project }: { project: Project }) {
           {project.tags.map((tag) => (
             <li
               key={tag}
-              className="rounded-full border border-border px-2.5 py-1 font-mono text-sm text-muted-foreground"
+              className="rounded-full border border-border px-2.5 py-1 font-mono text-base text-muted-foreground"
             >
               {tag}
             </li>
@@ -63,7 +63,7 @@ export function ProjectCard({ project }: { project: Project }) {
 
         <div className="mt-5 flex items-center justify-between">
           <span
-            className={`inline-flex items-center rounded-full px-2 py-0.5 text-sm font-medium ${
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-base font-medium ${
               project.status === 'live'
                 ? 'bg-emerald-100 text-emerald-800'
                 : 'bg-gray-100 text-gray-700'

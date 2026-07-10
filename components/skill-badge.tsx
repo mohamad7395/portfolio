@@ -5,7 +5,7 @@ export function SkillBadge({ name }: { name: string }) {
   const color = icon ? brandColor(icon) : undefined
 
   return (
-    <li className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-muted-foreground">
+    <li className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-base text-muted-foreground">
       {icon ? (
         <svg
           role="img"

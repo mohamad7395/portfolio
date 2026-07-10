@@ -42,7 +42,7 @@ export default async function ProjectDetailPage({
   return (
     <div className="flex min-h-screen flex-col">
       <SiteNav />
-      <main className="mx-auto w-full max-w-3xl lg:max-w-4xl flex-1 px-4 sm:px-6 pb-20 sm:pb-24 pt-14 sm:pt-16">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 sm:px-6 pb-20 sm:pb-24 pt-14 sm:pt-16">
         {/* Back button */}
         <Reveal>
           <Link
@@ -58,7 +58,7 @@ export default async function ProjectDetailPage({
         <Reveal className="mt-8">
           <div className="flex flex-wrap items-center gap-3">
             <span
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-sm font-medium ${
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-base font-medium ${
                 project.status === 'live'
                   ? 'bg-emerald-100 text-emerald-800'
                   : 'bg-gray-100 text-gray-700'
@@ -67,14 +67,14 @@ export default async function ProjectDetailPage({
               {project.status === 'live' ? 'Live Demo' : 'Case Study'}
             </span>
           </div>
-          <h1 className="mt-3 text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
+          <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
             {project.title}
           </h1>
         </Reveal>
 
         {/* One-liner description */}
         <Reveal delay={60} className="mt-4">
-          <p className="text-pretty leading-relaxed text-muted-foreground">
+          <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
             {project.description}
           </p>
         </Reveal>
@@ -85,7 +85,7 @@ export default async function ProjectDetailPage({
             {project.tags.map((tag) => (
               <li
                 key={tag}
-                className="rounded-full border border-border px-2.5 py-1 font-mono text-sm text-muted-foreground"
+                className="rounded-full border border-border px-2.5 py-1 font-mono text-base text-muted-foreground"
               >
                 {tag}
               </li>
@@ -116,10 +116,10 @@ export default async function ProjectDetailPage({
         {/* Overview */}
         <Reveal delay={80} className="mt-6">
           <div className="rounded-2xl bg-[#1a1a1a] border border-border p-6 sm:p-8">
-            <h2 className="text-base font-medium uppercase tracking-widest text-muted-foreground">
+            <h2 className="text-lg font-medium uppercase tracking-widest text-muted-foreground">
               Overview
             </h2>
-            <p className="mt-4 text-pretty leading-relaxed text-muted-foreground">
+            <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
               {detail?.overview ?? 'Overview coming soon.'}
             </p>
           </div>
@@ -129,7 +129,7 @@ export default async function ProjectDetailPage({
         {detail?.architecture && (
           <Reveal delay={100} className="mt-6">
             <div className="rounded-2xl bg-[#1a1a1a] border border-border p-6 sm:p-8">
-              <h2 className="text-base font-medium uppercase tracking-widest text-muted-foreground">
+              <h2 className="text-lg font-medium uppercase tracking-widest text-muted-foreground">
                 Architecture
               </h2>
               {isImageFile(detail.architecture) ? (
@@ -154,20 +154,20 @@ export default async function ProjectDetailPage({
         {/* Results */}
         <Reveal delay={120} className="mt-6">
           <div className="rounded-2xl bg-[#1a1a1a] border border-border p-6 sm:p-8">
-            <h2 className="text-base font-medium uppercase tracking-widest text-muted-foreground">
+            <h2 className="text-lg font-medium uppercase tracking-widest text-muted-foreground">
               Results
             </h2>
             {detail && detail.results.length > 0 ? (
               <ul className="mt-4 space-y-2">
                 {detail.results.map((r) => (
-                  <li key={r} className="flex gap-2 text-pretty leading-relaxed text-muted-foreground">
+                  <li key={r} className="flex gap-2 text-pretty text-lg leading-relaxed text-muted-foreground">
                     <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
                     {r}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="mt-4 text-pretty leading-relaxed text-muted-foreground">
+              <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
                 Key outcomes and metrics coming soon.
               </p>
             )}
@@ -178,7 +178,7 @@ export default async function ProjectDetailPage({
         {detail && (detail.screenshots?.length ?? detail.screenshotCount) > 0 && (
           <Reveal delay={140} className="mt-6">
             <div className="rounded-2xl bg-[#1a1a1a] border border-border p-6 sm:p-8">
-              <h2 className="text-base font-medium uppercase tracking-widest text-muted-foreground">
+              <h2 className="text-lg font-medium uppercase tracking-widest text-muted-foreground">
                 {detail.screenshots?.length ? 'Figures' : 'Screenshots'}
               </h2>
               {detail.screenshots?.length ? (

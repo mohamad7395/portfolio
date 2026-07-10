@@ -23,10 +23,10 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-      <nav className="mx-auto flex h-16 max-w-3xl lg:max-w-4xl items-center justify-between px-4 sm:px-6">
+      <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
         <Link
           href="/"
-          className="font-mono text-sm tracking-tight text-foreground transition-colors hover:text-accent"
+          className="font-mono text-base tracking-tight text-foreground transition-colors hover:text-accent"
         >
           {profile.name.split(' ')[0].toLowerCase()}
           <span className="text-accent">.</span>
@@ -39,7 +39,7 @@ export function SiteNav() {
               <Link
                 href={link.href}
                 className={cn(
-                  'rounded-md px-3 py-1.5 text-sm transition-colors',
+                  'rounded-md px-3 py-1.5 text-base transition-colors',
                   isActive(link.href)
                     ? 'text-foreground'
                     : 'text-muted-foreground hover:text-foreground',
@@ -65,14 +65,14 @@ export function SiteNav() {
       {/* Mobile dropdown */}
       {open && (
         <div className="sm:hidden border-t border-border/60 bg-background/95 backdrop-blur-md">
-          <ul className="mx-auto max-w-3xl flex flex-col px-4 py-3 gap-1">
+          <ul className="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1">
             {links.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    'block rounded-md px-3 py-2.5 text-sm transition-colors',
+                    'block rounded-md px-3 py-2.5 text-base transition-colors',
                     isActive(link.href)
                       ? 'text-foreground'
                       : 'text-muted-foreground hover:text-foreground',

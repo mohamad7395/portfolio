@@ -25,15 +25,15 @@ export default function HomePage() {
         <EducationSection />
         <PublicationsSection />
 
-        <section className="mx-auto max-w-3xl lg:max-w-4xl px-4 sm:px-6 py-4 pb-12 sm:pb-16">
+        <section className="mx-auto max-w-5xl px-4 sm:px-6 py-4 pb-12 sm:pb-16">
           <div className="rounded-2xl bg-[#1a1a1a] border border-border p-6 sm:p-8">
             <Reveal className="mb-8 flex items-end justify-between">
-              <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+              <h2 className="text-base font-medium uppercase tracking-widest text-muted-foreground">
                 Selected work
               </h2>
               <Link
                 href="/projects"
-                className="group inline-flex items-center gap-1 text-sm text-foreground transition-colors hover:text-accent"
+                className="group inline-flex items-center gap-1 text-base text-foreground transition-colors hover:text-accent"
               >
                 All projects
                 <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

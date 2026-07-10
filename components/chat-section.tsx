@@ -111,7 +111,7 @@ export function ChatSection() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl lg:max-w-4xl px-4 sm:px-6 pb-4">
+    <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-4">
       <div ref={containerRef} className="rounded-2xl border border-border bg-[#1a1a1a] p-3 sm:p-4">
         <div
           className={cn(
@@ -132,7 +132,7 @@ export function ChatSection() {
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => sendMessage(prompt)}
-                      className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+                      className="rounded-full border border-border bg-card px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
                     >
                       {prompt}
                     </button>
@@ -148,7 +148,7 @@ export function ChatSection() {
                     >
                       <div
                         className={cn(
-                          'max-w-[80%] whitespace-pre-wrap rounded-xl px-3.5 py-2 text-[15px] leading-[1.6] text-foreground',
+                          'max-w-[80%] whitespace-pre-wrap rounded-xl px-3.5 py-2 text-base leading-[1.6] text-foreground',
                           message.role === 'user' ? 'bg-[#2a2a2a]' : 'bg-[#1e1e1e]',
                         )}
                       >
@@ -182,7 +182,7 @@ export function ChatSection() {
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => setOpen(true)}
             placeholder="Ask me anything"
-            className="flex-1 bg-transparent text-[15px] text-foreground placeholder:text-muted-foreground focus:outline-none"
+            className="flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
           <button
             type="submit"
