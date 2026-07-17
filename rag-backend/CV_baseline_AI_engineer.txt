@@ -1,0 +1,83 @@
+﻿Mohammad Akbari Monfared
+Cologne, Germany • +4915751250643 • akbari.m1995@gmail.com • https://www.linkedin.com/in/mohamad-akbari-6a7888229/• https://github.com/mohamad7395
+
+AI/ML Engineer with 4+ years building and shipping AI products end to end, from idea and data handling through modeling and production. Track record of taking systems from concept to live deployment on AWS with CI/CD, Docker, and monitoring, shipping products now used daily in recruitment and industrial operations. Specialized in Large Language Models (LLMs), Retrieval-Augmented Generation (RAG), and multi-agent systems. Experienced with LangChain, LangGraph, and FAISS, integrating models from OpenAI, Anthropic, and Gemini. Master's from the University of Bonn (GPA 1.8) and a published paper on agentic systems (EACL 2026). Full working rights in Germany.
+
+
+AREAS OF EXPERTISE
+* RAG (Retrieval-Augmented Generation), Multi-Agent Workflows, Agentic Orchestration
+* Semantic Search, MCP, Prompt Engineering, Tool Calling, LLM Evaluation
+* LangChain, LangGraph, LlamaIndex, OpenAI, Anthropic, Gemini, Hugging Face, Ollama
+
+Machine Learning & Data Science
+* Anomaly Detection, Time-Series Forecasting, Model Evaluation
+* PyTorch, TensorFlow, Scikit-learn, XGBoost, pandas, NumPy
+
+Core Engineering & Platforms
+* Python, Java, JavaScript, SQL
+* gRPC, FastAPI, REST, Grafana, Streamlit
+* MongoDB, PostgreSQL, InfluxDB, FAISS, Pinecone
+* AWS (EC2, S3, VPC), Docker, CI/CD, Git, Staging/Production Deployment
+
+
+PROFESSIONAL EXPERIENCE
+DCV Technologies GmbH 
+Hamburg, Germany 
+Lead AI Enginee
+09.2025–present 
+* Led the full product lifecycle for two live AI products at DCV, owning design, implementation, delivery, and alignment with non-technical founders and business teams.
+* Built and shipped AIME (aimetalent.com), an agentic RAG product that cut a multi-day manual recruitment process to minutes by automating global sourcing and matching, now used daily by recruiters.
+* Engineered an agentic CV Matcher using RAG and deep semantic search, delivering high-precision candidate ranking and discovery across large databases.
+* Built an automated ETL pipeline that ingests CVs from a data lake, routes them by detected location, and uses LLMs to extract and structure profiles before loading them into vector and document databases (FAISS, MongoDB), triggered end-to-end without manual steps.
+* Designed and shipped a recruitment CRM with a team of two developers, covering the full lifecycle from client contact to commission payout by automating invoicing, margin calculation, and contract generation.
+* Owned cloud and deployment for both products on AWS, building CI/CD pipelines with Docker for automated testing and deployment to EC2 across staging and production, with data storage on S3, MongoDB, and RDS.
+
+SMS Group GmbH
+Mönchengladbach, Germany 
+Data Scientist – Part-time
+08.2022 - 08.2025 
+* Built and shipped an AI product for cold-rolling mills, taking it from idea to a system used in factories today, increasing production efficiency by 2%.
+* Designed an ETL pipeline processing high-frequency sensor data (10GB per 10-minute window), extracting compact, high-value summaries that resolved storage bottlenecks while preserving critical information.
+* Developed a custom statistical forecasting and anomaly-detection model as the core of the product, outperforming standard benchmarks by 30%.
+* Deployed end-to-end with integration into factory systems via gRPC and SQL, delivering real-time dashboards in Grafana that served predictions and monitored model performance and data drift.
+* Partnered with domain experts and senior management to translate operational challenges into the product roadmap and retraining logic that improved plant-level productivity.
+
+
+B-IT, University of Bonn
+Bonn, Germany 
+Student Researcher - Master’s Thesi
+08.2024 - 08.2025 
+* Built the first agentic LLM framework (Generator-Evaluator, LLM-as-judge) for Aspect-Based Sentiment Analysis, designing the multi-agent architecture and generating high-quality, label-consistent synthetic data. published at EACL 2026.
+* Designed a systematic evaluation framework across four SemEval benchmarks to measure agent output quality and data consistency, showing agentic augmentation can match real data in low-resource settings.
+
+
+DCV Technologies
+London, UK 
+Junior Software Developer
+06.2019 - 06.2021 
+* Automated internal data reporting workflows in Python, building repeatable data pipelines that saved the operations team several hours per week.
+* Built and consumed RESTful API endpoints, working with authentication flows and backend service integration.
+* Queried and maintained SQL databases as part of feature delivery, including schema design.
+* Worked in a shared codebase with Git, following code review and version control practices.
+
+
+EDUCATION  
+* University of Bonn
+Bonn, Germany
+Master of Computer Science - GPA: 1.8
+2021-2025
+
+* Sharif University of Technology
+Tehran, Iran
+Bachelor of Computer Science
+2014-2019
+
+
+PUBLICATIONS
+* Mitigating the Performance and Quality of Parallelized Compressive Sensing Reconstruction Using Image Stitching, May 2019 https://doi.org/10.1145/3299874.3317991
+* Label-Consistent Data Generation for Aspect-Based Sentiment Analysis Using LLM Agents, EACL 2026, March 2026, https://arxiv.org/pdf/2602.16379
+
+LANGUAGES
+* English : Business Fluent
+* Farsi : Native
+* German : A2
