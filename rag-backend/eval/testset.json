@@ -1,0 +1,243 @@
+{
+  "version": "v1",
+  "questions": [
+    {
+      "id": "q001",
+      "question": "What did you build at SMS Group?",
+      "ground_truth": "I built Mill Miner, a predictive process optimization system for cold rolling mills. I worked part-time on SMS Group's Data Science team from 2022 to 2025, in a three-person team under the Data Science Lead, and contributed across the full lifecycle — data acquisition and preprocessing, model development, productization, and deployment. It started as an exploratory data analysis effort and became a production-grade predictive tool that's now in active use across SMS Group's cold rolling mills, with real-time thickness prediction as its core functionality.",
+      "type": "factual",
+      "source_section": ["Mill Miner"]
+    },
+    {
+      "id": "q002",
+      "question": "How did you handle missing values in the sensor data at SMS Group?",
+      "ground_truth": "I used a context-sensitive strategy rather than one uniform rule. Gaps longer than one minute were treated as a sign of an underlying equipment issue and excluded from the analysis, because interpolating across them risked introducing misleading signal behavior. Shorter gaps — typically a handful of missing rows — were treated as transient sensor glitches and resolved by forward-filling from the preceding values.",
+      "type": "factual",
+      "source_section": ["Mill Miner"]
+    },
+    {
+      "id": "q003",
+      "question": "How large was the raw sensor data you were working with?",
+      "ground_truth": "A single ten-minute window of raw sensor recordings could reach 10 GB. To make it tractable, I wrote Python scripts that automatically detected steady-state production phases in the raw signal streams and extracted compact, statistically meaningful summaries of those phases, which dramatically reduced storage requirements while retaining the information needed for modeling.",
+      "type": "factual",
+      "source_section": ["Mill Miner"]
+    },
+    {
+      "id": "q004",
+      "question": "How did your custom forecasting model perform compared to standard approaches?",
+      "ground_truth": "The custom model delivered a 30% improvement in predictive performance over standard approaches, and it captured 75% of the total theoretically achievable optimization gain we had identified in our statistical analysis. Instead of using an off-the-shelf technique, I grouped data points by relevant process features and used distribution quantiles within each group to generate predictions, which fit the statistical characteristics of the rolling mill process.",
+      "type": "factual",
+      "source_section": ["Mill Miner"]
+    },
+    {
+      "id": "q005",
+      "question": "What database did Mill Miner use and how was the model kept up to date?",
+      "ground_truth": "Mill Miner used PostgreSQL for both model training and inference data. The ETL pipeline cleaned the raw data, segmented production phases, and populated that database. A separate retraining script automatically refreshed the predictive model on a recurring time-based cycle so it stayed aligned with evolving production conditions and current plant behavior.",
+      "type": "factual",
+      "source_section": ["Mill Miner"]
+    },
+    {
+      "id": "q006",
+      "question": "How does AIME figure out which country a candidate belongs to?",
+      "ground_truth": "I built an agentic routing layer that uses an LLM to analyze the unstructured CV content — including phone number prefixes and other regional cues drawn from the candidate's most recent position — to infer the candidate's country of origin. Based on that inference, the system programmatically shards incoming files and routes each CV to a country-specific S3 data lake. That country segmentation runs through the whole architecture: each country has its own S3 bucket, its own MongoDB collection, and its own vector database.",
+      "type": "factual",
+      "source_section": ["AIME"]
+    },
+    {
+      "id": "q007",
+      "question": "What does a recruiter actually get back when they search in AIME?",
+      "ground_truth": "They get a ranked shortlist of the top five candidates, each with a match score from 0 to 100. The recruiter selects a target country and provides a job description; the system extracts the key terms and requirements, selects the right vector store and MongoDB collection for that country, runs a semantic RAG search, and then re-ranks the retrieved candidates with an LLM acting as a judge, which scores each candidate and surfaces which job description keywords were matched in their profile. From the front end, recruiters can open either the original uploaded CV or the AI-standardized version.",
+      "type": "factual",
+      "source_section": ["AIME"]
+    },
+    {
+      "id": "q008",
+      "question": "Which external job boards is AIME integrated with?",
+      "ground_truth": "I directed the integration of AIME with four external global job boards, including Just Join IT, CV-Library, and Total Jobs. The integration lets the platform automatically generate and publish job ads, and apply its internal matching and ranking logic to harvest and score candidates sourced externally, turning AIME from an internal matching tool into a global recruitment intelligence hub.",
+      "type": "factual",
+      "source_section": ["AIME"]
+    },
+    {
+      "id": "q009",
+      "question": "What are the two agents in your thesis framework and what does each one do?",
+      "ground_truth": "It's a two-agent system: a Generator agent and an Evaluator agent operating in an iterative loop. The Generator has two custom tools — get-policy, which samples a target combination of aspect terms and polarities from the dataset and also retrieves three existing sentences to characterize their grammar, length, and style; and generate-sentence, which feeds those terms, polarities, and style cues into a prompt template to produce a candidate sentence. The Evaluator then applies two verification tools: a surface-level check that the sampled aspect terms actually appear in the generated string, and a more rigorous check that performs the ABSA task itself to confirm the terms appear in the correct grammatical role and carry exactly the sampled polarity. Only if both checks pass is the example written to disk; otherwise the loop goes back to the Generator.",
+      "type": "factual",
+      "source_section": ["Master's Thesis — ABSA LLM Agents"]
+    },
+    {
+      "id": "q010",
+      "question": "How much better was the agentic approach than plain prompting in your thesis?",
+      "ground_truth": "The agentic workflow consistently outperformed naive prompting-based generation by roughly 6% in F1-score, driven mainly by higher label consistency and less noise in the generated examples. The advantage was most pronounced on tasks requiring aspect term generation and more limited on ASPE, which requires joint prediction of both term and polarity.",
+      "type": "factual",
+      "source_section": ["Master's Thesis — ABSA LLM Agents"]
+    },
+    {
+      "id": "q011",
+      "question": "What models and datasets did you evaluate your thesis framework on?",
+      "ground_truth": "I evaluated across three ABSA subtasks — Aspect Term Extraction (ATE), Aspect Sentiment Classification (ATSC), and Aspect Sentiment Pair Extraction (ASPE) — on four SemEval benchmark datasets, using two instruction-tuned encoder-decoder models, T5-Base and Tk-Instruct. That let me study how the benefit of agentic augmentation varied across model scale and pretraining strategy.",
+      "type": "factual",
+      "source_section": ["Master's Thesis — ABSA LLM Agents"]
+    },
+    {
+      "id": "q012",
+      "question": "Is there a limit to how much synthetic data helps?",
+      "ground_truth": "Yes — augmentation was only beneficial in moderation. A 1:1 mixing ratio of synthetic to real data gave consistent improvements, but larger volumes of synthetic data diluted overall data quality and reduced downstream performance. I compared 1:1 and 2:1 ratios across all three subtasks and both models, so that's an empirical finding, not a guess.",
+      "type": "factual",
+      "source_section": ["Master's Thesis — ABSA LLM Agents"]
+    },
+    {
+      "id": "q013",
+      "question": "Tell me about your ETL pipeline experience.",
+      "ground_truth": "I've built production ETL pipelines in two very different domains. At SMS Group, I engineered a Python ETL pipeline that ingested high-frequency sensor data monthly, with memory efficiency as a core constraint: files were processed in batches of three at roughly 10 GB each, compact summaries were extracted and loaded into PostgreSQL, and the raw files were cleared from memory before the next batch. The whole thing ran unattended on cron jobs. At DCV, on AIME, the ETL is agentic rather than batch-statistical: CVs land in a central data lake, an LLM routing layer infers each candidate's country and shards the file into a country-specific S3 bucket, then a preprocessing layer uses an LLM to parse and standardize the CV into a structured profile with dense per-role summaries and a skills taxonomy, and dual-writes it into the country's FAISS vector store and MongoDB collection. Both run end-to-end with no manual steps — the difference is that one was built around memory limits and time-series volume, and the other around unstructured text and geographic scale.",
+      "type": "multi_hop",
+      "source_section": ["Mill Miner", "AIME"]
+    },
+    {
+      "id": "q014",
+      "question": "Where have you used LangChain and LangGraph?",
+      "ground_truth": "In two projects. In my master's thesis I used LangChain and LangGraph to orchestrate the multi-agent Generator-Evaluator workflow, with Hugging Face and Ollama for model access and inference. On AIME at DCV I used the same stack to orchestrate the agentic routing and RAG matching pipeline, but powered by Gemini and OpenAI models instead. So I've used them both in a research setting and in a live production system.",
+      "type": "multi_hop",
+      "source_section": ["Master's Thesis — ABSA LLM Agents", "AIME"]
+    },
+    {
+      "id": "q015",
+      "question": "Have you used LLM-as-a-judge in production, or only in research?",
+      "ground_truth": "Both. In my thesis the Evaluator agent is an LLM-as-judge that verifies each generated sentence — checking the aspect terms actually appear and carry exactly the sampled polarity — and rejects it back to the Generator if either check fails. In AIME, which is live in production, an LLM acts as a judge in the re-ranking stage: it scores each retrieved candidate against the job description from 0 to 100 and surfaces which job description keywords were matched in the profile. The pattern is the same — a second model verifying or scoring the first model's output — and I've shipped it in both contexts.",
+      "type": "multi_hop",
+      "source_section": ["Master's Thesis — ABSA LLM Agents", "AIME"]
+    },
+    {
+      "id": "q016",
+      "question": "Compare how you deployed Mill Miner versus how you deployed AIME.",
+      "ground_truth": "Very different constraints. Mill Miner ran on a virtual machine hosted on SMS Group's internal servers, which was deliberate — it gave low-latency connectivity to the factory's control software, integrated with plant systems over gRPC, persisted results in PostgreSQL, exposed predictions through a FastAPI service layer, and surfaced everything in real-time Grafana dashboards. AIME is cloud-native: I built a CI/CD pipeline that packages the app into Docker images and deploys across staging and production on AWS EC2, with S3 for CV and document storage, MongoDB for structured data, FAISS-backed vector stores for search, all inside an AWS VPC for network isolation. One was on-prem because of factory latency and integration needs, the other was cloud because it had to scale across geographies.",
+      "type": "multi_hop",
+      "source_section": ["Mill Miner", "AIME"]
+    },
+    {
+      "id": "q017",
+      "question": "What's your experience leading teams versus being an individual contributor?",
+      "ground_truth": "At SMS Group I was a contributor in a three-person project team under the direct leadership of their Data Science Lead, working across the full lifecycle of Mill Miner. At DCV Technologies I'm Lead AI Engineer and was Lead System Architect on AIME, leading a team of two developers and owning the product lifecycle from architectural design to production deployment on AWS EC2 — including translating stakeholder requirements into a modular architecture and decomposing the project into an implementation roadmap. I also shipped a recruitment CRM with a team of two developers. So I've gone from contributing inside a small team to owning architecture and delivery for it.",
+      "type": "multi_hop",
+      "source_section": ["AIME", "Mill Miner", null]
+    },
+    {
+      "id": "q018",
+      "question": "How much business impact have your projects actually had?",
+      "ground_truth": "Mill Miner increased production efficiency by about 2% at plant level, and its custom model outperformed standard benchmarks by 30% while capturing 75% of the theoretically achievable optimization gain. It's in active use across SMS Group's cold rolling mills supporting predictive maintenance and process optimization. AIME is used daily by hundreds of recruiters and cut a sourcing and matching process that previously took multiple days down to minutes. Both are measured by adoption, not just offline metrics — they're systems people use every day.",
+      "type": "multi_hop",
+      "source_section": ["Mill Miner", "AIME", null]
+    },
+    {
+      "id": "q019",
+      "question": "Which vector and document databases have you worked with?",
+      "ground_truth": "On AIME I use FAISS-backed vector stores for semantic search and MongoDB for structured candidate records, with a separate vector database and MongoDB collection per country, plus AWS S3 as the raw data lake; the architecture also involved Gemini File Search Store. On Mill Miner the storage layer was PostgreSQL for both training and inference data. More broadly I've worked with MongoDB, PostgreSQL, InfluxDB, FAISS, and Pinecone.",
+      "type": "multi_hop",
+      "source_section": ["AIME", "Mill Miner", null]
+    },
+    {
+      "id": "q020",
+      "question": "How do you work with non-technical stakeholders?",
+      "ground_truth": "It's been central to both of my main products. At SMS Group, over the project's two-year development cycle we held regular strategy sessions with stakeholders and senior management to present progress, validate alignment with evolving business requirements, and shape the technical roadmap together — that engagement was what drove adoption on the plant floor. I also developed the data cleaning methodology in iterative working sessions with domain experts so it matched industry standards and real machine behavior. At DCV, AIME originated from a defined set of business requirements, and I worked directly with non-technical founders and business teams to keep the technical direction aligned with real recruiter workflows and commercial priorities.",
+      "type": "multi_hop",
+      "source_section": ["Mill Miner", "AIME"]
+    },
+    {
+      "id": "q021",
+      "question": "You've worked at DCV twice — what changed between the two stints?",
+      "ground_truth": "I was at DCV Technologies in London from June 2019 to June 2021 as a Junior Software Developer, where I automated internal data reporting workflows in Python, built and consumed REST API endpoints with authentication flows, queried and maintained SQL databases including schema design, and worked in a shared codebase with Git and code review. I returned in September 2025 as Lead AI Engineer, where I now lead the full product lifecycle for two live AI products — AIME and a recruitment CRM — own the AWS cloud and deployment, and work directly with the founders. So it went from delivering features inside someone else's architecture to owning the architecture and the team.",
+      "type": "multi_hop",
+      "source_section": [null, "AIME"]
+    },
+    {
+      "id": "q022",
+      "question": "Do you have experience building things from scratch versus using existing tools?",
+      "ground_truth": "Both, and I try to pick deliberately. On Mill Miner I built a custom predictive model rather than using an off-the-shelf technique, because the rolling mill process had statistical characteristics that generic models didn't capture — grouping by process features and using distribution quantiles within each group beat standard approaches by 30%. In my thesis I built the agentic framework from scratch but deliberately built a closely matched prompting-based baseline reusing the exact same models and prompt templates, so any difference could be attributed to the architecture rather than the prompts or model choice. On AIME I leaned on established tooling — LangChain, LangGraph, FAISS, Gemini and OpenAI models — because the novelty was in the architecture, not the components.",
+      "type": "multi_hop",
+      "source_section": ["Mill Miner", "Master's Thesis — ABSA LLM Agents", "AIME"]
+    },
+    {
+      "id": "q023",
+      "question": "Tell me about the biggest data problem you've had to deal with.",
+      "ground_truth": "The scale of the raw sensor data at SMS Group. A single ten-minute window could reach 10 GB, which made both storage and analysis intractable. I wrote Python scripts that automatically detected steady-state production phases in the signal streams and extracted compact statistical summaries of them, which preserved the information needed for modeling while cutting storage massively. Then I built the ETL pipeline around that memory constraint: files were processed in batches of three, summaries loaded into PostgreSQL, raw files cleared from memory before the next batch, all scheduled via cron. That batching strategy is what let it scale without blowing the memory limit.",
+      "type": "ambiguous",
+      "source_section": ["Mill Miner"]
+    },
+    {
+      "id": "q024",
+      "question": "How do you make sure the AI output is actually correct?",
+      "ground_truth": "I build verification into the pipeline rather than trusting a single generation. In my thesis, the Evaluator agent runs two checks on every generated example — a surface check that the sampled aspect terms actually appear in the sentence, since LLMs frequently alter terms during phrasing, like pluralizing or misspelling them, and a rigorous check that performs the ABSA task itself to confirm the terms appear in the correct grammatical role with exactly the sampled polarity. Nothing gets written to disk unless both pass; otherwise it loops back to the Generator. In AIME, the LLM re-ranker scores each retrieved candidate against the job description and explicitly surfaces which keywords it matched, so the score is inspectable rather than a black box. At SMS Group, the Grafana dashboards monitored model performance and data drift in production.",
+      "type": "ambiguous",
+      "source_section": ["Master's Thesis — ABSA LLM Agents", "AIME", null]
+    },
+    {
+      "id": "q025",
+      "question": "What do you do when the data is messy?",
+      "ground_truth": "On Mill Miner the raw sensor data was messy in three distinct ways and each needed its own treatment. Missing values got a context-sensitive rule — gaps over a minute meant an equipment issue and were excluded, shorter gaps were transient glitches and were forward-filled. Noisy signal channels got low-pass filtering to suppress high-frequency noise while keeping the underlying trend. And signal naming was inconsistent across files, with multiple internal labels for the same physical signal, so I built and maintained an external-to-internal name mapping system to unify them. I developed all of it in iterative sessions with domain experts so it matched real machine behavior rather than a generic cleaning recipe. On AIME the messiness is different — CVs arrive in inconsistent formats and language conventions, so an LLM parses and standardizes each one into a uniform structured profile.",
+      "type": "ambiguous",
+      "source_section": ["Mill Miner", "AIME"]
+    },
+    {
+      "id": "q026",
+      "question": "What's the matching thing you built?",
+      "ground_truth": "That's the Agentic CV Matcher inside AIME, powered by Retrieval-Augmented Generation. A recruiter selects a target country and provides a job description; the system extracts key terms and requirements from it, dynamically selects the correct geographic context — the right vector store and MongoDB collection — runs a semantic RAG search to retrieve the most relevant candidate profiles, then passes them through an LLM re-ranking stage that scores each candidate and surfaces the matched keywords. The output is a ranked shortlist of the top five candidates with match scores from 0 to 100.",
+      "type": "ambiguous",
+      "source_section": ["AIME"]
+    },
+    {
+      "id": "q027",
+      "question": "Tell me about your work with agents.",
+      "ground_truth": "Agentic systems are my main specialization, and I've built them in two settings. My master's thesis introduced the first agentic data augmentation framework for Aspect-Based Sentiment Analysis — a Generator-Evaluator loop where one agent produces synthetic examples using get-policy and generate-sentence tools and a second agent verifies them before they're accepted; it beat naive prompting by roughly 6% F1 and was published at EACL 2026. At DCV, AIME uses agents in production: an LLM routing agent infers each candidate's country from unstructured CV content and shards the file accordingly, and the Agentic CV Matcher combines RAG retrieval with an LLM-as-judge re-ranker. Both were orchestrated with LangChain and LangGraph.",
+      "type": "ambiguous",
+      "source_section": ["Master's Thesis — ABSA LLM Agents", "AIME"]
+    },
+    {
+      "id": "q028",
+      "question": "How do you handle scale?",
+      "ground_truth": "It depends on which axis is scaling. For data volume on Mill Miner, I processed 10 GB files in batches of three, extracting summaries into PostgreSQL and clearing raw files from memory before the next batch, so the pipeline scaled reliably without exceeding system memory. For geographic and search scale on AIME, I sharded the entire data architecture by country — each country has its own S3 bucket, MongoDB collection, and vector database — which keeps search fast and contextually scoped to the right regional dataset instead of querying one undifferentiated repository. For deployment scale, AIME runs on AWS EC2 with Docker and a CI/CD pipeline across staging and production.",
+      "type": "ambiguous",
+      "source_section": ["Mill Miner", "AIME"]
+    },
+    {
+      "id": "q029",
+      "question": "What was your GPA in your bachelor's degree at Sharif University?",
+      "ground_truth": "I don't have that information available here. My CV lists my Bachelor of Computer Science at Sharif University of Technology from 2014 to 2019 and my Master's GPA of 1.8 from the University of Bonn, but my bachelor's GPA isn't included. Feel free to reach out to me directly at akbari.m1995@gmail.com if you'd like to know more.",
+      "type": "unanswerable",
+      "source_section": []
+    },
+    {
+      "id": "q030",
+      "question": "What's the p95 latency of AIME's RAG search, and how many CVs are in the database?",
+      "ground_truth": "I don't have those specific numbers in what I've documented here. I can tell you the design was built to keep search fast by scoping each query to a country-specific vector store, and that AIME reduced a multi-day sourcing process to minutes and is used daily by hundreds of recruiters — but I don't have p95 latency figures or a total CV count to share. Happy to talk through it directly if that's useful.",
+      "type": "unanswerable",
+      "source_section": []
+    },
+    {
+      "id": "q031",
+      "question": "Have you worked with Kubernetes?",
+      "ground_truth": "That's not something I have documented in my background. My deployment experience is with Docker, CI/CD pipelines, and AWS EC2 across staging and production for AIME, and a VM on internal servers for Mill Miner at SMS Group — but Kubernetes isn't listed among my tools. I'd rather be accurate about that than overstate it.",
+      "type": "unanswerable",
+      "source_section": []
+    },
+    {
+      "id": "q032",
+      "question": "What are your salary expectations and when could you start?",
+      "ground_truth": "That's not something I can answer here — it isn't covered in the material I'm working from. I'd be glad to discuss it directly; you can reach me at akbari.m1995@gmail.com or +49 15751250643.",
+      "type": "unanswerable",
+      "source_section": []
+    },
+    {
+      "id": "q033",
+      "question": "Why did the Mill Miner project end in August 2025 — were you laid off?",
+      "ground_truth": "I don't have anything documented about the reasons the role ended. What I can say is that my part-time Data Scientist position at SMS Group ran from August 2022 to August 2025, and I started as Lead AI Engineer at DCV Technologies in September 2025. Mill Miner itself is still in active use at SMS Group's cold rolling mills. Anything beyond that I'd be happy to discuss directly.",
+      "type": "unanswerable",
+      "source_section": []
+    },
+    {
+      "id": "q034",
+      "question": "Which LLM did you use for the Generator agent in your thesis — GPT-4 or Claude?",
+      "ground_truth": "I don't have the specific base model for the Generator agent documented here. What I can tell you is that the framework was implemented in Python with LangChain and LangGraph for orchestration, and Hugging Face and Ollama for model access and inference, and that the downstream evaluation used T5-Base and Tk-Instruct as the ABSA models. The exact generation model isn't something I can confirm from what I have — the paper is at arxiv.org/pdf/2602.16379 if you want the full detail.",
+      "type": "unanswerable",
+      "source_section": []
+    }
+  ]
+}
