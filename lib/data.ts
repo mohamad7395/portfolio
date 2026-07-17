@@ -108,7 +108,7 @@ export const experience: Experience[] = [
     role: 'Junior Software Developer',
     company: 'DCV Technologies',
     period: 'Jun 2019 — Jun 2021',
-    location: 'London, UK',
+    location: 'Remote',
     points: [
       'Developed and maintained Python scripts automating internal data reporting workflows, saving the operations team several hours per week with repeatable pipelines.',
       'Built and consumed RESTful API endpoints, working across request/response cycles, authentication flows, and backend service integration.',
