@@ -27,7 +27,7 @@ jobs:
         run: pip install -r rag-backend/requirements.txt
 
       - name: Build index
-        run: cd rag-backend && python pipeline/build_index.py
+        run: cd rag-backend && python build_index.py
 
       - name: Run eval
         run: cd rag-backend && python eval/run_eval.py
