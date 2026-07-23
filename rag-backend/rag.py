@@ -112,3 +112,4 @@ def chat(request: ChatRequest):
     retrieved = retrieve_hybrid(request.question)
     answer = ask_with_context(request.question, retrieved)
     return ChatResponse(answer=answer)
+# test
