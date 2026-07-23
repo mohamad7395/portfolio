@@ -108,17 +108,23 @@ def compute_hand_metrics(results):
 
 
 def get_git_sha():
-    return (
-        subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=RAG_BACKEND_DIR)
-        .decode()
-        .strip()
-    )
-
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], 
+            cwd=RAG_BACKEND_DIR,
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except subprocess.CalledProcessError:
+        return "unknown"
+    
 
 def main():
     with open(TESTSET_PATH, "r", encoding="utf-8") as f:
         testset = json.load(f)
 
+    DAGSHUB_TOKEN = os.environ.get("DAGSHUB_TOKEN", "")
+    os.environ["DAGSHUB_USER_TOKEN"] = DAGSHUB_TOKEN
+    dagshub.auth.add_app_token(token=DAGSHUB_TOKEN)
     dagshub.init(repo_owner=DAGSHUB_USERNAME, repo_name=DAGSHUB_REPO, mlflow=True)
 
     with mlflow.start_run():
