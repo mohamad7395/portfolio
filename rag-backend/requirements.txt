@@ -73,7 +73,6 @@ huey==3.2.1
 huggingface_hub==0.36.2
 idna==3.18
 importlib_metadata==9.0.0
-instructor==1.15.4
 ipykernel==7.3.0
 ipython==9.15.0
 ipython_pygments_lexers==1.1.1
