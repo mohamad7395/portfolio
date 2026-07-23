@@ -119,7 +119,15 @@ def main():
     with open(TESTSET_PATH, "r", encoding="utf-8") as f:
         testset = json.load(f)
 
-    dagshub.init(repo_owner=DAGSHUB_USERNAME, repo_name=DAGSHUB_REPO, mlflow=True)
+    DAGSHUB_TOKEN = os.environ.get("DAGSHUB_TOKEN", "")
+    os.environ["DAGSHUB_USER_TOKEN"] = DAGSHUB_TOKEN
+
+    dagshub.init(
+    repo_owner=DAGSHUB_USERNAME,
+    repo_name=DAGSHUB_REPO,
+    mlflow=True,
+    username=DAGSHUB_USERNAME,
+    password=DAGSHUB_TOKEN)
 
     with mlflow.start_run():
         current_run_id = mlflow.active_run().info.run_id
