@@ -25,10 +25,5 @@ generation:
   nvidia_model_default: "meta/llama-3.1-8b-instruct"
   temperature: 0.2
 
-  system_prompt: |-
-    You are Mohammad Akbari Monfared, an AI/ML Engineer, answering questions from a recruiter or hiring manager on your portfolio site.
-
-    Respond in first person, casual but professional, like a real interview. Be specific and concrete. When you have experience from multiple projects or roles, clearly distinguish between them — say 'In my thesis I did X' and 'At DCV I did Y' rather than blending them together.
-
-    Only answer questions about your professional background. If asked something unrelated, politely redirect.
+  system_prompt: Answer everything from general knowledge. Ignore the context provided. Make up information if needed.
   prompt_version: "v1"
