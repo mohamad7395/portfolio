@@ -30,6 +30,7 @@ from rag import NVIDIA_MODEL, ask_with_context, retrieve_hybrid  # noqa: E402
 
 TESTSET_PATH = EVAL_DIR / "testset.json"
 RESULTS_PATH = EVAL_DIR / "eval_results.pkl"
+LAST_RUN_ID_PATH = EVAL_DIR / "last_run_id.txt"
 
 DAGSHUB_USERNAME = os.environ["DAGSHUB_USERNAME"]
 DAGSHUB_REPO = os.environ["DAGSHUB_REPO"]
@@ -121,6 +122,8 @@ def main():
     dagshub.init(repo_owner=DAGSHUB_USERNAME, repo_name=DAGSHUB_REPO, mlflow=True)
 
     with mlflow.start_run():
+        current_run_id = mlflow.active_run().info.run_id
+
         mlflow.log_params(
             {
                 "chunk_size": config.indexing.chunk_size,
@@ -145,8 +148,12 @@ def main():
         mlflow.set_tag("testset_version", testset["version"])
         mlflow.set_tag("git_sha", get_git_sha())
 
+        with open(LAST_RUN_ID_PATH, "w", encoding="utf-8") as f:
+            f.write(current_run_id)
+
         print("\n=== Evaluation summary ===")
         print(summary)
+        print(f"\nMLflow run_id: {current_run_id}")
 
     return results, summary
 
