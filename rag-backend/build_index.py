@@ -41,35 +41,40 @@ def split_by_project(text):
     return sections
 
 
-chunks = []
-for path in SOURCE_FILES:
-    with open(path, "r", encoding="utf-8") as f:
-        text = f.read()
-    for project_name, section_text in split_by_project(text):
-        for chunk in splitter.split_text(section_text):
-            chunks.append({"text": chunk, "source": path, "project": project_name})
+def main():
+    chunks = []
+    for path in SOURCE_FILES:
+        with open(path, "r", encoding="utf-8") as f:
+            text = f.read()
+        for project_name, section_text in split_by_project(text):
+            for chunk in splitter.split_text(section_text):
+                chunks.append({"text": chunk, "source": path, "project": project_name})
 
-model = SentenceTransformer(EMBEDDING_MODEL)
-embeddings = model.encode(
-    [chunk["text"] for chunk in chunks],
-    convert_to_numpy=True,
-    show_progress_bar=True,
-)
+    model = SentenceTransformer(EMBEDDING_MODEL)
+    embeddings = model.encode(
+        [chunk["text"] for chunk in chunks],
+        convert_to_numpy=True,
+        show_progress_bar=True,
+    )
 
-dimension = embeddings.shape[1]
-index = faiss.IndexFlatL2(dimension)
-index.add(embeddings)
-faiss.write_index(index, INDEX_PATH)
+    dimension = embeddings.shape[1]
+    index = faiss.IndexFlatL2(dimension)
+    index.add(embeddings)
+    faiss.write_index(index, INDEX_PATH)
 
-bm25 = BM25Okapi([chunk["text"].lower().split() for chunk in chunks])
-with open(BM25_PATH, "wb") as f:
-    pickle.dump(bm25, f)
+    bm25 = BM25Okapi([chunk["text"].lower().split() for chunk in chunks])
+    with open(BM25_PATH, "wb") as f:
+        pickle.dump(bm25, f)
 
-with open(CHUNKS_PATH, "wb") as f:
-    pickle.dump(chunks, f)
+    with open(CHUNKS_PATH, "wb") as f:
+        pickle.dump(chunks, f)
 
-print(f"Indexed {len(chunks)} chunks from {len(SOURCE_FILES)} files")
-print(
-    f"Saved FAISS index to {INDEX_PATH}, BM25 index to {BM25_PATH}, "
-    f"and chunk metadata to {CHUNKS_PATH}"
-)
+    print(f"Indexed {len(chunks)} chunks from {len(SOURCE_FILES)} files")
+    print(
+        f"Saved FAISS index to {INDEX_PATH}, BM25 index to {BM25_PATH}, "
+        f"and chunk metadata to {CHUNKS_PATH}"
+    )
+
+
+if __name__ == "__main__":
+    main()
