@@ -43,6 +43,29 @@ jobs:
       - name: Deploy rag-backend
         run: rsync -avz --exclude='venv' --exclude='__pycache__' --exclude='eval/eval_results.pkl' rag-backend/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/portfolio/rag-backend/
 
+      - name: Check if rag-backend changed
+        id: rag-check
+        run: |
+          git diff --name-only HEAD~1 HEAD | grep '^rag-backend/' && echo "changed=true" >> $GITHUB_OUTPUT || echo "changed=false" >> $GITHUB_OUTPUT
+
+      - name: Setup Python for index build
+        if: steps.rag-check.outputs.changed == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        if: steps.rag-check.outputs.changed == 'true'
+        run: pip install -r rag-backend/requirements.txt
+
+      - name: Build index
+        if: steps.rag-check.outputs.changed == 'true'
+        run: cd rag-backend && python build_index.py
+
+      - name: Copy index to EC2
+        if: steps.rag-check.outputs.changed == 'true'
+        run: rsync -avz rag-backend/index.faiss rag-backend/chunks.pkl rag-backend/bm25.pkl ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/portfolio/rag-backend/
+
       - name: Reload services
         run: |
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "pm2 reload portfolio && pm2 restart rag-backend"
