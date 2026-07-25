@@ -4,6 +4,7 @@ import { SiteNav } from '@/components/site-nav'
 import { SiteFooter } from '@/components/site-footer'
 import { Hero } from '@/components/hero'
 import { ChatSection } from '@/components/chat-section'
+import { MonitoringWidget } from '@/components/monitoring-widget'
 import { Reveal } from '@/components/reveal'
 import { ProjectCard } from '@/components/project-card'
 import { ExperienceSection } from '@/components/experience-section'
@@ -20,6 +21,7 @@ export default function HomePage() {
       <main className="flex-1">
         <Hero />
         <ChatSection />
+        <MonitoringWidget />
 
         <ExperienceSection />
         <EducationSection />
