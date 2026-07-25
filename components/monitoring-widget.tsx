@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, RefreshCw } from 'lucide-react'
 import {
   Bar,
   BarChart,
@@ -165,6 +165,16 @@ export function MonitoringWidget() {
     return () => document.removeEventListener('pointerdown', handlePointerDown)
   }, [open])
 
+  useEffect(() => {
+    if (!open) return
+
+    const id = setInterval(() => {
+      loadData()
+    }, 30_000)
+
+    return () => clearInterval(id)
+  }, [open])
+
   async function loadData() {
     if (!supabase) {
       setError('Supabase is not configured.')
@@ -201,12 +211,14 @@ export function MonitoringWidget() {
     setLoading(false)
   }
 
+  function refresh() {
+    setFetched(true)
+    loadData()
+  }
+
   function handleToggle() {
     setOpen((prev) => !prev)
-    if (!fetched) {
-      setFetched(true)
-      loadData()
-    }
+    if (!fetched) refresh()
   }
 
   const allRows = rows ?? []
@@ -232,26 +244,44 @@ export function MonitoringWidget() {
     }
   })
 
-  const hasData = !loading && !error && rows && rows.length > 0
+  const hasData = !!rows && rows.length > 0
+  const showInitialLoading = loading && rows === null
+  const showInitialError = !loading && error && rows === null
+  const showEmpty = !loading && !error && rows && rows.length === 0
 
   return (
     <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-4">
       <div ref={containerRef} className="rounded-2xl border border-[#222222] bg-[#111111] p-3 sm:p-4">
-        <button
-          type="button"
-          onClick={handleToggle}
-          className="flex w-full items-center justify-between gap-2 text-left"
-        >
-          <span className="flex items-center gap-2.5">
+        <div className="flex w-full items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={handleToggle}
+            className="flex flex-1 items-center gap-2.5 text-left"
+          >
             <PulsingDot />
             <span className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
               Live Chat Metrics
             </span>
-          </span>
-          <ChevronDown
-            className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
-          />
-        </button>
+          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                refresh()
+              }}
+              aria-label="Refresh metrics"
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
+            </button>
+            <button type="button" onClick={handleToggle} aria-label={open ? 'Collapse metrics' : 'Expand metrics'}>
+              <ChevronDown
+                className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
+              />
+            </button>
+          </div>
+        </div>
 
         <div
           className={cn(
@@ -260,9 +290,9 @@ export function MonitoringWidget() {
           )}
         >
           <div className="overflow-hidden">
-            {loading && <p className="py-16 text-center text-sm text-muted-foreground">Loading metrics…</p>}
-            {!loading && error && <p className="py-16 text-center text-sm text-muted-foreground">{error}</p>}
-            {!loading && !error && rows && rows.length === 0 && (
+            {showInitialLoading && <p className="py-16 text-center text-sm text-muted-foreground">Loading metrics…</p>}
+            {showInitialError && <p className="py-16 text-center text-sm text-muted-foreground">{error}</p>}
+            {showEmpty && (
               <p className="py-16 text-center text-sm text-muted-foreground">No requests logged yet.</p>
             )}
 
