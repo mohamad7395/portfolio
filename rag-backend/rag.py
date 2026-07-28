@@ -3,6 +3,7 @@ import pickle
 import time
 
 import faiss
+import numpy as np
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -37,20 +38,6 @@ UNANSWERABLE_PHRASES = [
     "not covered",
     "don't have information",
 ]
-
-import math
-
-def sigmoid(x):
-    return 1 / (1 + math.exp(-x))
-
-
-def normalize_rerank_score(score):
-    # Sigmoid shifted to make typical cross-encoder range more readable
-    # Maps ~-12 → 0%, ~-6 → 50%, ~0 → 100%
-    return round(sigmoid(score + 3) * 100, 1)
-
-
-
 
 EMBEDDING_MODEL = config.embedding.model
 RERANKER_MODEL = config.retrieval.reranker_model
@@ -110,10 +97,14 @@ def retrieve_hybrid(question, query_embedding=None, top_k=TOP_K, candidate_k=CAN
     )
 
     results = []
-    for i, score in reranked[:top_k]:
-        chunk = dict(chunks[i])
-        chunk["rerank_score"] = normalize_rerank_score(float(score))
+    scores_array = np.array([float(score) for _, score in reranked[:top_k]])
+    softmax_probs = np.exp(scores_array) / np.exp(scores_array).sum()
+
+    for idx, (chunk_idx, raw_score) in enumerate(reranked[:top_k]):
+        chunk = dict(chunks[chunk_idx])
+        chunk["rerank_score"] = round(float(softmax_probs[idx]) * 100, 1)
         results.append(chunk)
+        
     return results
 
 

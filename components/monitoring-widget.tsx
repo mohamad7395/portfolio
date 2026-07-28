@@ -142,8 +142,11 @@ function TokensDailyTooltip({ active, payload }: { active?: boolean; payload?: {
   )
 }
 
-export function MonitoringWidget() {
-  const [open, setOpen] = useState(false)
+export function MonitoringWidget({
+  forceOpen = false,
+  embedded = false,
+}: { forceOpen?: boolean; embedded?: boolean } = {}) {
+  const [open, setOpen] = useState(forceOpen)
   const [rows, setRows] = useState<ChartRow[] | null>(null)
   const [totalCount, setTotalCount] = useState(0)
   const [last24hCount, setLast24hCount] = useState(0)
@@ -153,7 +156,7 @@ export function MonitoringWidget() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!open) return
+    if (forceOpen || !open) return
 
     function handlePointerDown(e: PointerEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -163,7 +166,12 @@ export function MonitoringWidget() {
 
     document.addEventListener('pointerdown', handlePointerDown)
     return () => document.removeEventListener('pointerdown', handlePointerDown)
-  }, [open])
+  }, [open, forceOpen])
+
+  useEffect(() => {
+    if (forceOpen) refresh()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -217,6 +225,7 @@ export function MonitoringWidget() {
   }
 
   function handleToggle() {
+    if (forceOpen) return
     setOpen((prev) => !prev)
     if (!fetched) refresh()
   }
@@ -250,13 +259,13 @@ export function MonitoringWidget() {
   const showEmpty = !loading && !error && rows && rows.length === 0
 
   return (
-    <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-4">
+    <section className={embedded ? 'pb-4' : 'mx-auto max-w-5xl px-4 sm:px-6 pb-4'}>
       <div ref={containerRef} className="rounded-2xl border border-[#222222] bg-[#111111] p-3 sm:p-4">
         <div className="flex w-full items-center justify-between gap-2">
           <button
             type="button"
             onClick={handleToggle}
-            className="flex flex-1 items-center gap-2.5 text-left"
+            className={cn('flex flex-1 items-center gap-2.5 text-left', forceOpen && 'cursor-default')}
           >
             <PulsingDot />
             <span className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
@@ -275,11 +284,13 @@ export function MonitoringWidget() {
             >
               <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
             </button>
-            <button type="button" onClick={handleToggle} aria-label={open ? 'Collapse metrics' : 'Expand metrics'}>
-              <ChevronDown
-                className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
-              />
-            </button>
+            {!forceOpen && (
+              <button type="button" onClick={handleToggle} aria-label={open ? 'Collapse metrics' : 'Expand metrics'}>
+                <ChevronDown
+                  className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
+                />
+              </button>
+            )}
           </div>
         </div>
 

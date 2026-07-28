@@ -8,6 +8,8 @@ import { Reveal } from '@/components/reveal'
 import { projects } from '@/lib/data'
 import { projectDetails } from '@/lib/project-details'
 import { FiguresGrid } from '@/components/figures-grid'
+import { ChatSection } from '@/components/chat-section'
+import { MonitoringWidget } from '@/components/monitoring-widget'
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }))
@@ -93,6 +95,14 @@ export default async function ProjectDetailPage({
           </ul>
         </Reveal>
 
+        {/* Live chat + monitoring — RAG chatbot project only */}
+        {slug === 'rag-chatbot' && (
+          <Reveal delay={70} className="mt-6">
+            <ChatSection forceOpen embedded />
+            <MonitoringWidget forceOpen embedded />
+          </Reveal>
+        )}
+
         {/* Links */}
         {detail && detail.links.length > 0 && (
           <Reveal delay={70} className="mt-6">
@@ -133,11 +143,21 @@ export default async function ProjectDetailPage({
                 Architecture
               </h2>
               {isImageFile(detail.architecture) ? (
-                <div className="mt-4 mx-auto w-[85%] flex justify-center rounded-xl bg-gray-100 p-4 sm:p-6">
+                <div
+                  className={
+                    slug === 'rag-chatbot'
+                      ? 'mt-4 mx-auto w-[85%] flex justify-center rounded-xl p-4 sm:p-6'
+                      : 'mt-4 mx-auto w-[85%] flex justify-center rounded-xl bg-gray-100 p-4 sm:p-6'
+                  }
+                >
                   <img
                     src={detail.architecture}
                     alt="Architecture diagram"
-                    className="block w-full max-w-[500px] rounded-lg"
+                    className={
+                      slug === 'rag-chatbot'
+                        ? 'block w-full max-w-[640px] rounded-lg'
+                        : 'block w-full max-w-[500px] rounded-lg'
+                    }
                   />
                 </div>
               ) : (

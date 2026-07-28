@@ -24,6 +24,14 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    title: 'AI Portfolio Assistant — Production RAG + LLMOps',
+    description: 'A live RAG chatbot answering questions about my background, built as a complete LLMOps system with eval-gated CI/CD, experiment tracking, and live monitoring.',
+    tags: ['RAG', 'FAISS', 'BM25', 'FastAPI', 'MLflow', 'DagsHub', 'Supabase', 'GitHub Actions', 'AWS EC2'],
+    slug: 'rag-chatbot',
+    status: 'live',
+    demo: 'https://monfared.dev',
+  },
+  {
     title: 'AIME — Agentic Recruitment Platform',
     description: 'End-to-end agentic RAG ecosystem that automates global candidate sourcing, standardization, and matching at scale.',
     tags: ['LangChain', 'LangGraph', 'RAG', 'FAISS', 'AWS', 'MongoDB', 'FastAPI', 'Python'],
@@ -46,14 +54,6 @@ export const projects: Project[] = [
     slug: 'sms-forecasting',
     status: 'showcase',
   },
-  {
-    title: 'RAG Portfolio Chatbot',
-    description: 'Ask me anything about my experience, projects, and skills. Powered by a RAG pipeline indexed on my CV and project descriptions.',
-    tags: ['RAG', 'LangChain', 'FastAPI', 'AWS', 'Next.js'],
-    slug: 'rag-chatbot',
-    status: 'live',
-  },
-
 ]
 
 export type Experience = {
