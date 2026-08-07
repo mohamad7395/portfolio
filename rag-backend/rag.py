@@ -24,6 +24,11 @@ NVIDIA_MODEL = os.environ.get("NVIDIA_MODEL", config.generation.nvidia_model_def
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_SECRET_KEY = os.environ.get("SUPABASE_SECRET_KEY")
 
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+JUDGE_MODEL = 'openai/gpt-oss-20b'
+groq_client = OpenAI(base_url='https://api.groq.com/openai/v1', api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+
+
 print(SUPABASE_URL, SUPABASE_SECRET_KEY)
 
 supabase: Client | None = None
@@ -133,6 +138,27 @@ def is_refusal(answer):
     lowered = answer.lower()
     return any(phrase in lowered for phrase in UNANSWERABLE_PHRASES)
 
+def judge_faithfulness(question, context, answer):
+    if groq_client is None:
+        return None
+    try:
+        prompt = (
+            f"Context:\n{context}\n\n"
+            f"Question: {question}\n\n"
+            f"Answer: {answer}\n\n"
+            "Rate how faithfully the answer is grounded in the context. "
+            "Score from 0.0 (fabricated, not in context) to 1.0 (fully grounded). "
+            "Respond with ONLY a number."
+        )
+        response = groq_client.chat.completions.create(
+            model=JUDGE_MODEL,
+            messages=[{'role': 'user', 'content': prompt}],
+            temperature=0,
+            max_tokens=10
+        )
+        return float(response.choices[0].message.content.strip())
+    except Exception:
+        return None
 
 def log_request_to_supabase(row):
     if supabase is None:
@@ -179,8 +205,9 @@ def chat(request: ChatRequest, background_tasks: BackgroundTasks):
 
     answer = response.choices[0].message.content
 
+    context_text = "\n\n".join(chunk["text"] for chunk in retrieved)
+
     top_chunk_scores = [chunk["rerank_score"] for chunk in retrieved]
-    best_score = max(top_chunk_scores) if top_chunk_scores else None
 
     usage = response.usage
     tokens_in = usage.prompt_tokens if usage else None
@@ -195,7 +222,7 @@ def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     "latency_generate_ms": (t3 - t2) * 1000,
     "latency_total_ms": (t3 - t0) * 1000,
     "top_chunk_scores": top_chunk_scores,
-    "best_score": best_score,
+    "best_score": judge_faithfulness(request.question, context_text, answer),
     "tokens_in": tokens_in,
     "tokens_out": tokens_out,
     "llm_model": NVIDIA_MODEL,
