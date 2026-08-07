@@ -25,7 +25,7 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_SECRET_KEY = os.environ.get("SUPABASE_SECRET_KEY")
 
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
-JUDGE_MODEL = 'openai/gpt-oss-20b'
+JUDGE_MODEL = 'llama-3.3-70b-versatile'
 groq_client = OpenAI(base_url='https://api.groq.com/openai/v1', api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 
@@ -140,15 +140,20 @@ def is_refusal(answer):
 
 def judge_faithfulness(question, context, answer):
     if groq_client is None:
+        print('Groq clinet is none')
         return None
     try:
         prompt = (
             f"Context:\n{context}\n\n"
             f"Question: {question}\n\n"
             f"Answer: {answer}\n\n"
-            "Rate how faithfully the answer is grounded in the context. "
-            "Score from 0.0 (fabricated, not in context) to 1.0 (fully grounded). "
-            "Respond with ONLY a number."
+            "Scoring guide (use any number, these are reference points):\n"
+            "100 - Every claim is directly stated in the context\n"
+            "80  - Mostly grounded; minor reasonable inferences from context\n"
+            "60  - Core answer correct but adds details not in the context\n"
+            "40  - Mixes supported facts with invented specifics\n"
+            "0   - Fabricated, not grounded in the context at all\n\n"
+            "Respond with ONLY a number between 0 and 100."
         )
         response = groq_client.chat.completions.create(
             model=JUDGE_MODEL,
@@ -156,8 +161,11 @@ def judge_faithfulness(question, context, answer):
             temperature=0,
             max_tokens=10
         )
-        return float(response.choices[0].message.content.strip())
-    except Exception:
+        result = float(response.choices[0].message.content.strip())
+        print(f"Judge response: {result}")
+        return result
+    except Exception as e:
+        print(f"Error occurred: {e}")
         return None
 
 def log_request_to_supabase(row):
