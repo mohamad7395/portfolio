@@ -69,6 +69,8 @@ jobs:
         if: steps.rag-check.outputs.changed == 'true'
         run: rsync -avz rag-backend/index.faiss rag-backend/chunks.pkl rag-backend/bm25.pkl ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/portfolio/rag-backend/
 
+      - name: Deploy claim-agent
+        run: rsync -avz --exclude='venv' --exclude='__pycache__' --exclude='.env' claim-agent/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/portfolio/claim-agent/
 
 
       - name: Reload services
