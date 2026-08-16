@@ -1,0 +1,18 @@
+[
+  {"q": "cancellation compensation notice period", "expect": ["reg-art-5", "reg-art-7"]},
+  {"q": "delay three hours arrival compensation", "expect": ["reg-art-7"]},
+  {"q": "compensation amount distance 1500 km", "expect": ["reg-art-7"]},
+  {"q": "technical fault engine defect extraordinary circumstances", "expect": ["gl-5-2-2"]},
+  {"q": "bird strike extraordinary circumstances", "expect": ["gl-5-2-3"]},
+  {"q": "strike by airline staff extraordinary", "expect": ["gl-5-2-2"]},
+  {"q": "flight from third country to EU airline scope", "expect": ["reg-art-3"]},
+  {"q": "how is arrival delay measured", "expect": ["gl-3-3-3"]},
+  {"q": "how is distance calculated great circle", "expect": ["reg-art-7", "gl-4-4-11"]},
+  {"q": "burden of proof informing passenger of cancellation", "expect": ["reg-art-5", "gl-3-2-5"]},
+  {"q": "long delay at arrival three hours", "expect": ["gl-3-3-2", "gl-4-4-7"]},
+  {"q": "re-routing arrival less than three hours late reduction", "expect": ["reg-art-7", "gl-4-4-13"]},
+  {"q": "definition of cancellation", "expect": ["gl-3-2-1"]},
+  {"q": "reasonable measures air carrier extraordinary", "expect": ["gl-5-3"]},
+  {"q": "care meals accommodation during delay", "expect": ["reg-art-9"]}
+]
+

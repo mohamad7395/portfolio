@@ -1,0 +1,190 @@
+{
+  "version": "v1",
+  "cases": [
+    {
+      "id": "E01",
+      "type": "eligible_cancellation",
+      "situation": "My flight from Cologne to Barcelona on 14 June was cancelled. They only told me when I got to the airport. The airline said it was a technical problem with the aircraft.",
+      "expect_verdict": "eligible",
+      "expect_amount": 250,
+      "expect_articles": ["reg-art-5", "reg-art-7"],
+      "note": "CGN-BCN 1133 km, under 1500. Notice at the airport = less than 7 days, no re-routing offered. Technical fault is internal, not extraordinary."
+    },
+    {
+      "id": "E02",
+      "type": "eligible_delay",
+      "situation": "I flew Frankfurt to New York last Tuesday. We landed 5 hours behind schedule because of a problem with one of the engines that they found during checks.",
+      "expect_verdict": "eligible",
+      "expect_amount": 600,
+      "expect_articles": ["reg-art-7"],
+      "note": "FRA-JFK 6189 km, over 3500. 5h arrival delay clears the 3h threshold (Sturgeon, per Guidelines 3.3.2). Technical defect found in maintenance is expressly not extraordinary."
+    },
+    {
+      "id": "E03",
+      "type": "eligible_delay",
+      "situation": "Amsterdam to Lisbon, arrived 3 hours and 40 minutes late. Crew shortage apparently, one of the cabin crew called in sick.",
+      "expect_verdict": "eligible",
+      "expect_amount": 400,
+      "expect_articles": ["reg-art-7"],
+      "note": "AMS-LIS 1847 km, intra-EU over 1500. Unexpected crew absence through illness is expressly not extraordinary."
+    },
+    {
+      "id": "E04",
+      "type": "eligible_cancellation",
+      "situation": "Munich to Paris cancelled four days before departure. They put me on a flight the next morning, so I got there about 14 hours later than planned. Reason given was a strike by their own ground staff over pay.",
+      "expect_verdict": "eligible",
+      "expect_amount": 250,
+      "expect_articles": ["reg-art-5", "reg-art-7"],
+      "note": "MUC-CDG 682 km. Under 7 days notice; re-routing arrived far beyond the 2h window so the exemption fails. Strike over pay by the carrier's own staff is not extraordinary."
+    },
+    {
+      "id": "E05",
+      "type": "eligible_delay",
+      "situation": "Dusseldorf to Vienna. The mobile boarding stairs hit the plane while we were boarding and they had to check for damage. We got in 3 hours 20 minutes late.",
+      "expect_verdict": "eligible",
+      "expect_amount": 250,
+      "expect_articles": ["reg-art-7"],
+      "note": "DUS-VIE 788 km. Boarding stairs collision is expressly named as an internal event, not extraordinary."
+    },
+
+    {
+      "id": "N01",
+      "type": "under_threshold",
+      "situation": "My flight from Hamburg to Munich was about an hour and a half late. Can I claim anything?",
+      "expect_verdict": "not_eligible",
+      "expect_amount": 0,
+      "expect_articles": ["reg-art-7"],
+      "note": "1h30 arrival delay is below the 3h threshold. Should be blocked by the rule gate with no retrieval needed."
+    },
+    {
+      "id": "N02",
+      "type": "under_threshold",
+      "situation": "Cologne to Palma, we landed 2 hours and 50 minutes late. The airline blamed a technical fault.",
+      "expect_verdict": "not_eligible",
+      "expect_amount": 0,
+      "expect_articles": ["reg-art-7"],
+      "note": "Deliberately just under 3h. Cause would otherwise qualify — tests that the threshold is applied before the cause is considered."
+    },
+    {
+      "id": "N03",
+      "type": "notice_exempt",
+      "situation": "They cancelled my Stuttgart to Berlin flight. I got the email about three weeks before the departure date.",
+      "expect_verdict": "not_eligible",
+      "expect_amount": 0,
+      "expect_articles": ["reg-art-5"],
+      "note": "Art 5(1)(c)(i): informed at least two weeks ahead, no compensation regardless of cause."
+    },
+    {
+      "id": "N04",
+      "type": "extraordinary",
+      "situation": "Frankfurt to Athens cancelled on the day. A bird strike on the inbound flight damaged the aircraft.",
+      "expect_verdict": "not_eligible",
+      "expect_amount": 0,
+      "expect_articles": ["reg-art-5"],
+      "note": "Bird strike is expressly extraordinary (external event). Art 5(3) exempts the carrier."
+    },
+
+    {
+      "id": "X01",
+      "type": "extraordinary",
+      "situation": "Frankfurt to Istanbul, delayed 4 hours. Air traffic control were on strike that day across the region.",
+      "expect_verdict": "not_eligible",
+      "expect_amount": 0,
+      "expect_articles": ["reg-art-5"],
+      "note": "Third-party strike, not the carrier's own staff. Beyond the carrier's control, so extraordinary."
+    },
+    {
+      "id": "X02",
+      "type": "extraordinary",
+      "situation": "My flight from Frankfurt to Dubai was cancelled. There was a severe snowstorm and the airport was closed for most of the day.",
+      "expect_verdict": "not_eligible",
+      "expect_amount": 0,
+      "expect_articles": ["reg-art-5"],
+      "note": "Meteorological conditions incompatible with the flight — extraordinary under recital 14 and section 5.2.3."
+    },
+    {
+      "id": "X03",
+      "type": "extraordinary_but_eligible",
+      "situation": "Berlin to Madrid, delayed 5 hours total. They said 90 minutes of it was because of a runway closure after a fuel spill from another airline's aircraft, and the rest was because the crew then went out of hours.",
+      "expect_verdict": "eligible",
+      "expect_amount": 400,
+      "expect_articles": ["reg-art-7"],
+      "note": "BER-MAD 1851 km. Guidelines 3.3.3: deduct only the portion attributable to the extraordinary circumstance. 5h minus 1h30 leaves 3h30, still above the threshold. Crew timing out is internal. This is the hardest case in the set."
+    },
+    {
+      "id": "X04",
+      "type": "extraordinary",
+      "situation": "Sao Paulo to Frankfurt with Lufthansa, cancelled after a catering truck belonging to the airport handler crashed into the parked aircraft.",
+      "expect_verdict": "not_eligible",
+      "expect_amount": 0,
+      "expect_articles": ["reg-art-3", "reg-art-5"],
+      "note": "In scope: third country to EU on a Community carrier (Art 3(1)(b)). Third-party vehicle collision is expressly extraordinary."
+    },
+
+    {
+      "id": "C01",
+      "type": "notice_tier",
+      "situation": "My Frankfurt to Madrid flight was cancelled. They told me 10 days beforehand and rebooked me on a flight leaving an hour later the same day, arriving about 90 minutes after the original.",
+      "expect_verdict": "not_eligible",
+      "expect_amount": 0,
+      "expect_articles": ["reg-art-5"],
+      "note": "MAD-FRA 1422 km. Art 5(1)(c)(ii): 2 weeks to 7 days notice, re-routing within the 2h early / 4h late window. Exemption applies."
+    },
+    {
+      "id": "C02",
+      "type": "notice_tier",
+      "situation": "Cancelled Frankfurt to Madrid, told 10 days before. The replacement they offered got me in 6 hours after my original arrival time.",
+      "expect_verdict": "eligible",
+      "expect_amount": 250,
+      "expect_articles": ["reg-art-5", "reg-art-7"],
+      "note": "Same tier as C01 but re-routing arrives more than 4h late, so the exemption fails. Tests that the re-routing window is actually checked."
+    },
+    {
+      "id": "C03",
+      "type": "reduction",
+      "situation": "Boston to Frankfurt cancelled the day before. They rebooked me and I arrived 3 hours after my original landing time. No particular reason given.",
+      "expect_verdict": "eligible",
+      "expect_amount": 300,
+      "expect_articles": ["reg-art-5", "reg-art-7"],
+      "note": "BOS-FRA 5889 km, over 3500 so base is 600. Art 5(1)(c)(iii) exemption fails (arrival more than 2h late). But Art 7(2)(c): re-routed arrival within 4h of schedule allows a 50% reduction. 600 -> 300."
+    },
+
+    {
+      "id": "I01",
+      "type": "incomplete",
+      "situation": "My flight to Vienna was delayed. Am I owed anything?",
+      "expect_verdict": "need_info",
+      "expect_amount": null,
+      "expect_questions": ["delay_length", "origin"],
+      "note": "Delay length is decisive and missing. Origin needed for the distance band. Should ask both in one batch, not answer."
+    },
+    {
+      "id": "I02",
+      "type": "incomplete",
+      "situation": "Frankfurt to Singapore was cancelled last month and I want to claim.",
+      "expect_verdict": "need_info",
+      "expect_amount": null,
+      "expect_questions": ["notice_period"],
+      "note": "FRA-SIN 10278 km so the amount would be 600, but notice period decides eligibility entirely. Cause is secondary — ask for notice first."
+    },
+
+    {
+      "id": "S01",
+      "type": "out_of_scope",
+      "situation": "I was flying Singapore Airlines from Singapore to Tokyo and the flight was cancelled. Can I claim under EU rules?",
+      "expect_verdict": "not_eligible",
+      "expect_amount": 0,
+      "expect_articles": ["reg-art-3"],
+      "note": "Art 3(1): neither departing from an EU airport nor a non-EU to EU flight on a Community carrier. Outside the regulation entirely."
+    },
+    {
+      "id": "S02",
+      "type": "out_of_scope",
+      "situation": "My flight was fine but the airline lost my suitcase and it took a week to get it back. What compensation do I get?",
+      "expect_verdict": "refuse",
+      "expect_amount": null,
+      "expect_articles": [],
+      "note": "Baggage is governed by the Montreal Convention, not 261/2004. The system should refuse and say so rather than answer from the wrong instrument."
+    }
+  ]
+}

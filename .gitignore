@@ -10,8 +10,12 @@ __v0_jsx-dev-runtime.ts
 .env*.local
 
 rag-backend/.env
+claim-agent/.env
 
 # Common ignores
 node_modules
 .next/
 .DS_Store
+
+rag-backend/.env
+claim-agent/.env
