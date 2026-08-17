@@ -99,5 +99,5 @@ if __name__ == "__main__":
         "raw_input":"My flight was cancelled, they told me two days before, no alternative was offered." ,
         "facts": None,
     })
-    print(result["facts"].model_dump_json(exclude_none=True, indent=2))
-    print("missing:", result["missing_fields"])
+    # print(result["facts"].model_dump_json(exclude_none=True, indent=2))
+    # print("missing:", result["missing_fields"])

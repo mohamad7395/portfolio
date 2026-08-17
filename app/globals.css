@@ -152,4 +152,23 @@
       transition: none;
     }
   }
+  .claim-node-active {
+    animation: claim-pulse-border 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .claim-node-active {
+      animation: none;
+      box-shadow: 0 0 0 3px oklch(0.62 0.19 260 / 35%);
+    }
+  }
+}
+
+@keyframes claim-pulse-border {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.62 0.19 260 / 45%);
+  }
+  50% {
+    box-shadow: 0 0 0 4px oklch(0.62 0.19 260 / 0%);
+  }
 }

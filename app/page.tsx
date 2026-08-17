@@ -5,6 +5,7 @@ import { SiteFooter } from '@/components/site-footer'
 import { Hero } from '@/components/hero'
 import { ChatSection } from '@/components/chat-section'
 import { MonitoringWidget } from '@/components/monitoring-widget'
+import { ClaimAgent } from '@/components/claim-agent'
 import { Reveal } from '@/components/reveal'
 import { ProjectCard } from '@/components/project-card'
 import { ExperienceSection } from '@/components/experience-section'
@@ -22,6 +23,7 @@ export default function HomePage() {
         <Hero />
         <ChatSection />
         <MonitoringWidget />
+        <ClaimAgent />
 
         <ExperienceSection />
         <EducationSection />

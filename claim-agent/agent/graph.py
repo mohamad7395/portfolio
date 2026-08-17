@@ -39,16 +39,45 @@ class ClaimState(TypedDict):
     clarification_attempts: int
     letter: Optional[str]
     amount: Optional[int]
+    final_letter: Optional[str]
 
+
+from openai import OpenAI
+import os
+client = OpenAI(api_key=os.environ["GROQ_API_KEY"], base_url="https://api.groq.com/openai/v1")
+MODEL = "llama-3.3-70b-versatile"
+
+
+
+from langgraph.config import get_stream_writer
+from agent.calculate import great_circle_km, intra_eu, band_for, amount_for
 
 def rule_gate_node(state: ClaimState) -> dict:
+    writer = get_stream_writer()
     result = gate(state["facts"])
     update = {"gate_result": result}
-    if not result.blocked:
-        facts = state["facts"]
-        update["amount"] = amount_for(facts.origin, facts.destination)
-    return update
 
+    if result.blocked:
+        writer({"type": "gate_thinking", "detail": f"blocked: {result.reason}"})
+    else:
+        writer({"type": "gate_thinking", "detail": "rule gate passed, calculating compensation..."})
+        facts = state["facts"]
+
+        distance = great_circle_km(facts.origin, facts.destination)
+        is_eu = intra_eu(facts.origin, facts.destination)
+        band = band_for(distance, is_eu)
+
+        writer({"type": "gate_thinking",
+                "detail": f"distance {facts.origin}-{facts.destination}: {distance:.0f} km, intra-EU261: {is_eu}"})
+        writer({"type": "gate_thinking", "detail": f"Article 7 band: EUR {band}"})
+
+        amount = amount_for(facts.origin, facts.destination, facts.reroute_arrive_late_hours)
+        if amount != band:
+            writer({"type": "gate_thinking", "detail": f"50% reduction applied (fast reroute): EUR {amount}"})
+
+        update["amount"] = amount
+
+    return update
 
 def ask_clarification_node(state: ClaimState) -> dict:
     question = f"Still need: {', '.join(state['missing_fields'])}. Can you provide that?"
@@ -63,21 +92,32 @@ def respond_node(state: ClaimState) -> dict:
     if state["missing_fields"]:
         return {"response": f"Still need: {', '.join(state['missing_fields'])}"}
 
+    facts = state["facts"]
     gate_result = state["gate_result"]
 
     if gate_result and gate_result.blocked:
-        text = f"Not eligible: {gate_result.reason}"
+        outcome = f"NOT ELIGIBLE. Reason: {gate_result.reason}"
     elif state["extraordinary"]:
-        text = f"Not eligible: extraordinary circumstances. {state['extraordinary_reason']}"
-    elif state.get("letter"):
-        text = state["letter"]
+        outcome = f"NOT ELIGIBLE. Extraordinary circumstances: {state['extraordinary_reason']}"
     else:
-        text = f"Eligible for EUR {state['amount']}."
+        outcome = f"ELIGIBLE for EUR {state['amount']}. Flight {facts.origin}->{facts.destination}, {facts.claim_type}, not extraordinary circumstances."
 
-    return {"response": text}
+    resp = client.chat.completions.create(
+        model=MODEL, temperature=0,
+        messages=[{"role": "user", "content":
+                   f"Write a very short summary (max 2 sentences) explaining this EU261 claim outcome to the passenger in plain language.\n\n{outcome}"}],
+    )
+    summary = resp.choices[0].message.content.strip()
+
+    return {
+        "response": summary,
+        "final_letter": state.get("letter"),
+    }
 
 
 def route(state: ClaimState) -> str:
+    writer = get_stream_writer()
+
     if state["missing_fields"]:
         if state.get("clarification_attempts", 0) >= 3:
             decision = "respond"
@@ -92,6 +132,7 @@ def route(state: ClaimState) -> str:
     else:
         decision = "respond"
 
+    writer({"type": "route_decision", "detail": f"router -> {decision}"})
     print(f"[router] missing={state['missing_fields']} gate={state['gate_result']} "
           f"extraordinary={state['extraordinary']} -> {decision}")
     return decision
@@ -145,4 +186,4 @@ if __name__ == "__main__":
         answer = input(f"\n[agent] {question}\n> ")
         result = app.invoke(Command(resume=answer), config=config)
 
-    print(f"\n{result['response']}")
+    # print(f"\n{result['response']}")
