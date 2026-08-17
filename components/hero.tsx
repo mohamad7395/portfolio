@@ -7,7 +7,7 @@ import { profile } from '@/lib/data'
 
 export function Hero() {
   return (
-    <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20 sm:pb-24 pt-16 sm:pt-20 lg:pt-28">
+    <section className="mx-auto max-w-[76.8rem] px-4 sm:px-6 pb-20 sm:pb-24 pt-16 sm:pt-20 lg:pt-28">
       <div className="flex flex-col-reverse items-start gap-10 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <Reveal>

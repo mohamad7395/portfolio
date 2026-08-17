@@ -4,7 +4,14 @@ import { useRef, useState, type FormEvent } from 'react'
 import { Check, ChevronDown, Copy, Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-type NodeId = 'extract_facts' | 'rule_gate' | 'judge_extraordinary' | 'draft_letter' | 'respond'
+type NodeId =
+  | 'extract_facts'
+  | 'confirm_facts'
+  | 'rule_gate'
+  | 'judge_extraordinary'
+  | 'draft_letter'
+  | 'respond'
+  | 'ask_clarification'
 type NodeStatus = 'idle' | 'active' | 'complete' | 'skipped'
 
 type LogLine = { id: number; icon: string; text: string; color: string }
@@ -26,18 +33,21 @@ type PendingOutcome = {
   letter: string | null
 }
 
-const PIPELINE: { id: NodeId; label: string; description: string }[] = [
-  { id: 'extract_facts', label: 'extract_facts', description: 'Parses flight details from your message' },
-  { id: 'rule_gate', label: 'rule_gate', description: 'Checks eligibility against EU261 rules' },
-  { id: 'judge_extraordinary', label: 'judge_extraordinary', description: 'Judges if the cause was extraordinary' },
-  { id: 'draft_letter', label: 'draft_letter', description: 'Drafts the compensation claim letter' },
-  { id: 'respond', label: 'respond', description: 'Prepares the final verdict and summary' },
+const TRACKABLE_NODES: NodeId[] = [
+  'extract_facts',
+  'confirm_facts',
+  'rule_gate',
+  'judge_extraordinary',
+  'draft_letter',
+  'respond',
+  'ask_clarification',
 ]
 
 const CLAIM_API_URL = 'https://monfared.dev/api/claim/stream'
 
+
 const idleStatus: Record<NodeId, NodeStatus> = Object.fromEntries(
-  PIPELINE.map((n) => [n.id, 'idle']),
+  TRACKABLE_NODES.map((id) => [id, 'idle']),
 ) as Record<NodeId, NodeStatus>
 
 const emptyPending: PendingOutcome = {
@@ -59,26 +69,155 @@ function PulsingDot() {
   )
 }
 
-function PipelineNode({ status, label, description }: { status: NodeStatus; label: string; description: string }) {
+function GraphBox({ status, label }: { status: NodeStatus; label: string }) {
   return (
     <div
       className={cn(
-        'rounded-lg border p-3 transition-colors',
-        status === 'idle' && 'border-[#2a2a2a] bg-[#1a1a1a]',
+        'flex h-full items-center justify-center gap-1.5 rounded-lg border px-2 transition-colors',
+        status === 'idle' && 'border-[#333333] bg-[#1a1a1a]',
         status === 'active' && 'border-[#3b82f6] bg-[#1a1a1a] claim-node-active',
-        status === 'complete' && 'border-[#2a2a2a] bg-[#1a1a1a]',
-        status === 'skipped' && 'border-[#2a2a2a] bg-[#161616] opacity-50',
+        status === 'complete' && 'border-[#86efac] bg-[#1a1a1a]',
+        status === 'skipped' && 'border-[#333333] bg-[#161616] opacity-50',
       )}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className={cn('font-mono text-sm font-medium', status === 'skipped' ? 'text-muted-foreground' : 'text-foreground')}>
-          {label}
-        </span>
-        {status === 'complete' && <Check className="size-3.5 shrink-0 text-[#86efac]" />}
-        {status === 'active' && <span className="size-2 shrink-0 animate-pulse rounded-full bg-[#3b82f6]" />}
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      <span className={cn('truncate font-mono text-[12px]', status === 'skipped' ? 'text-muted-foreground' : 'text-white')}>
+        {label}
+      </span>
+      {status === 'complete' && <Check className="size-3 shrink-0 text-[#86efac]" />}
+      {status === 'active' && <span className="size-1.5 shrink-0 animate-pulse rounded-full bg-[#3b82f6]" />}
     </div>
+  )
+}
+
+function RouterDiamond({ cx, cy }: { cx: number; cy: number }) {
+  return (
+    <rect
+      x={cx - 7}
+      y={cy - 7}
+      width={14}
+      height={14}
+      rx={2}
+      fill="#2a2a2a"
+      stroke="#555555"
+      strokeWidth={1}
+      transform={`rotate(45 ${cx} ${cy})`}
+    />
+  )
+}
+
+function GraphArrow({ d }: { d: string }) {
+  return <path d={d} fill="none" stroke="#444444" strokeWidth={1.25} markerEnd="url(#claim-arrowhead)" />
+}
+
+// Hand-tuned tree layout matching the LangGraph topology: extract_facts and
+// router1 branch to ask_clarification / confirm_facts / an early "missing
+// fields" respond, confirm_facts either loops back to extract_facts or
+// re-enters router1 toward rule_gate, then router2/router3 gate on
+// blocked/extraordinary before the flow reaches draft_letter -> respond -> END.
+const BOX_W = 120
+const LEFT_X = 0
+const CENTER_X = 140
+const RIGHT_X = 280
+const CENTER_CX = CENTER_X + BOX_W / 2
+const RIGHT_CX = RIGHT_X + BOX_W / 2
+
+const GRAPH_VIEWBOX = '-6 0 412 480'
+
+function PipelineGraph({ status }: { status: Record<NodeId, NodeStatus> }) {
+  return (
+    <svg viewBox={GRAPH_VIEWBOX} className="h-auto w-full" role="img" aria-label="Claim agent pipeline graph">
+      <defs>
+        <marker id="claim-arrowhead" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill="#444444" />
+        </marker>
+      </defs>
+
+      {/* extract_facts -> router1 */}
+      <GraphArrow d={`M${CENTER_CX},48 L${CENTER_CX},65`} />
+      {/* router1 -> confirm_facts (straight down) */}
+      <GraphArrow d={`M${CENTER_CX},79 L${CENTER_CX},90`} />
+      {/* router1 -> ask_clarification (left) */}
+      <GraphArrow d={`M193,72 Q150,90 120,106`} />
+      {/* router1 -> respond "fields missing" (right) */}
+      <GraphArrow d={`M207,72 Q250,90 280,106`} />
+      {/* router1 -> rule_gate, bulging around confirm_facts */}
+      <GraphArrow d={`M204,79 C260,95 260,140 ${CENTER_CX},156`} />
+
+      {/* ask_clarification loops back up to extract_facts */}
+      <GraphArrow d={`M60,90 C60,55 140,55 140,48`} />
+      {/* confirm_facts -> extract_facts (corrected) */}
+      <GraphArrow d={`M140,105 C90,90 90,60 150,48`} />
+      {/* confirm_facts -> router1 (confirmed) */}
+      <GraphArrow d={`M230,90 Q225,80 207,76`} />
+
+      {/* rule_gate -> router2 */}
+      <GraphArrow d={`M${CENTER_CX},196 L${CENTER_CX},215`} />
+      {/* router2 -> respond "blocked" (left) */}
+      <GraphArrow d={`M193,222 Q150,240 120,256`} />
+      {/* router2 -> judge_extraordinary (right) */}
+      <GraphArrow d={`M207,222 Q250,240 280,260`} />
+
+      {/* judge_extraordinary -> router3 */}
+      <GraphArrow d={`M${RIGHT_CX},280 L${RIGHT_CX},299`} />
+      {/* router3 -> respond "extraordinary" (left) */}
+      <GraphArrow d={`M333,306 Q300,322 260,340`} />
+      {/* router3 -> draft_letter (straight down) */}
+      <GraphArrow d={`M${RIGHT_CX},313 L${RIGHT_CX},324`} />
+
+      {/* draft_letter -> final respond */}
+      <GraphArrow d={`M${RIGHT_CX},364 L${RIGHT_CX},390`} />
+      {/* final respond -> END */}
+      <GraphArrow d={`M${RIGHT_CX},430 L${RIGHT_CX},448`} />
+
+      <RouterDiamond cx={CENTER_CX} cy={72} />
+      <RouterDiamond cx={CENTER_CX} cy={222} />
+      <RouterDiamond cx={RIGHT_CX} cy={306} />
+
+      {/* extract_facts */}
+      <foreignObject x={CENTER_X} y={8} width={BOX_W} height={40}>
+        <GraphBox status={status.extract_facts} label="extract_facts" />
+      </foreignObject>
+
+      {/* router1 branches */}
+      <foreignObject x={LEFT_X} y={90} width={BOX_W} height={32}>
+        <GraphBox status={status.ask_clarification} label="ask_clarification" />
+      </foreignObject>
+      <foreignObject x={CENTER_X} y={90} width={BOX_W} height={40}>
+        <GraphBox status={status.confirm_facts} label="confirm_facts" />
+      </foreignObject>
+      <foreignObject x={RIGHT_X} y={90} width={BOX_W} height={32}>
+        <GraphBox status={status.respond} label="respond" />
+      </foreignObject>
+
+      <foreignObject x={CENTER_X} y={156} width={BOX_W} height={40}>
+        <GraphBox status={status.rule_gate} label="rule_gate" />
+      </foreignObject>
+
+      {/* router2 branches */}
+      <foreignObject x={LEFT_X} y={240} width={BOX_W} height={32}>
+        <GraphBox status={status.respond} label="respond" />
+      </foreignObject>
+      <foreignObject x={RIGHT_X} y={240} width={BOX_W} height={40}>
+        <GraphBox status={status.judge_extraordinary} label="judge_extraordinary" />
+      </foreignObject>
+
+      {/* router3 branches */}
+      <foreignObject x={CENTER_X} y={324} width={BOX_W} height={32}>
+        <GraphBox status={status.respond} label="respond" />
+      </foreignObject>
+      <foreignObject x={RIGHT_X} y={324} width={BOX_W} height={40}>
+        <GraphBox status={status.draft_letter} label="draft_letter" />
+      </foreignObject>
+
+      {/* final respond */}
+      <foreignObject x={RIGHT_X} y={390} width={BOX_W} height={40}>
+        <GraphBox status={status.respond} label="respond" />
+      </foreignObject>
+
+      <text x={RIGHT_CX} y={464} textAnchor="middle" fontSize={10} fontFamily="monospace" fill="#666666">
+        END
+      </text>
+    </svg>
   )
 }
 
@@ -97,7 +236,6 @@ export function ClaimAgent() {
 
   const containerRef = useRef<HTMLDivElement>(null)
   const logRef = useRef<HTMLDivElement>(null)
-  const logIdRef = useRef(0)
   const pendingRef = useRef<PendingOutcome>({ ...emptyPending })
 
   const hasStarted = logs.length > 0 || result !== null || clarification !== null
@@ -110,12 +248,13 @@ export function ClaimAgent() {
     setLetterOpen(false)
     setThreadId(null)
     pendingRef.current = { ...emptyPending }
-    logIdRef.current = 0
   }
 
   function pushLog(icon: string, text: string, color: string) {
-    logIdRef.current += 1
-    setLogs((prev) => [...prev, { id: logIdRef.current, icon, text, color }])
+    setLogs((prev) => {
+      const nextId = (prev.at(-1)?.id ?? 0) + 1
+      return [...prev, { id: nextId, icon, text, color }]
+    })
     requestAnimationFrame(() => {
       logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' })
     })
@@ -132,9 +271,9 @@ export function ClaimAgent() {
   function finalizePipeline() {
     setNodeStatus((prev) => {
       const next = { ...prev }
-      for (const node of PIPELINE) {
-        if (next[node.id] === 'idle') next[node.id] = 'skipped'
-        if (next[node.id] === 'active') next[node.id] = 'complete'
+      for (const id of TRACKABLE_NODES) {
+        if (next[id] === 'idle') next[id] = 'skipped'
+        if (next[id] === 'active') next[id] = 'complete'
       }
       return next
     })
@@ -145,6 +284,10 @@ export function ClaimAgent() {
     switch (event.type) {
       case 'thread': {
         setThreadId(event.thread_id ?? null)
+        break
+      }
+      case 'clarification_asked': {
+        pushLog('❓', String(event.detail ?? ''), '#a3a3a3')
         break
       }
       case 'gate_thinking': {
@@ -163,14 +306,14 @@ export function ClaimAgent() {
         const detail: string = event.detail ?? ''
         pushLog('→', detail, '#666666')
         const decision = detail.match(/->\s*(\w+)/)?.[1]
-        if (decision && PIPELINE.some((n) => n.id === decision)) {
+        if (decision && TRACKABLE_NODES.includes(decision as NodeId)) {
           markActive(decision as NodeId)
         }
         break
       }
       case 'node_complete': {
         const node = event.node as string
-        if (PIPELINE.some((n) => n.id === node)) {
+        if (TRACKABLE_NODES.includes(node as NodeId)) {
           markComplete(node as NodeId)
           pushLog('✓', `${node} complete`, '#86efac')
         }
@@ -192,6 +335,11 @@ export function ClaimAgent() {
       }
       case 'interrupt': {
         setClarification(event.question ?? 'Can you provide more detail?')
+        setRunning(false)
+        break
+      }
+      case 'error': {
+        pushLog('⚠️', event.message ? `Pipeline error: ${event.message}` : 'Pipeline error.', '#f87171')
         setRunning(false)
         break
       }
@@ -285,7 +433,7 @@ export function ClaimAgent() {
   }
 
   return (
-    <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-4">
+    <section className="mx-auto max-w-[76.8rem] px-4 sm:px-6 pb-4">
       <div ref={containerRef} className="rounded-2xl border border-[#222222] bg-[#111111] p-3 sm:p-4">
         <button
           type="button"
@@ -308,7 +456,16 @@ export function ClaimAgent() {
           )}
         >
           <div className="overflow-hidden">
-            <form onSubmit={handleSubmit} className="flex items-center gap-2 rounded-full border border-border bg-background px-2 py-2 pl-4">
+            <div className="rounded-xl border border-[#2a2a2a] bg-[#161616] px-4 py-3">
+              <h3 className="text-sm font-medium text-white">EU261 Flight Compensation Checker</h3>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                Describe your flight disruption in plain English. The agent extracts the facts, checks EU Regulation
+                261/2004 deterministically, and — if eligible — drafts a compensation claim letter with legal
+                citations. No guessing: if information is missing, it asks.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-4 flex items-center gap-2 rounded-full border border-border bg-background px-2 py-2 pl-4">
               <input
                 type="text"
                 value={input}
@@ -330,18 +487,7 @@ export function ClaimAgent() {
             {hasStarted && (
               <div className="mt-4 grid gap-4 lg:grid-cols-[35%_1fr]">
                 {/* Pipeline graph */}
-                <div>
-                  {PIPELINE.map((node, i) => (
-                    <div key={node.id}>
-                      <PipelineNode status={nodeStatus[node.id]} label={node.label} description={node.description} />
-                      {i < PIPELINE.length - 1 && (
-                        <div className="flex justify-center py-1">
-                          <div className="h-4 w-px bg-[#2a2a2a]" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <PipelineGraph status={nodeStatus} />
 
                 {/* Log + result */}
                 <div className="space-y-4">

@@ -44,7 +44,7 @@ export default async function ProjectDetailPage({
   return (
     <div className="flex min-h-screen flex-col">
       <SiteNav />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 sm:px-6 pb-20 sm:pb-24 pt-14 sm:pt-16">
+      <main className="mx-auto w-full max-w-[76.8rem] flex-1 px-4 sm:px-6 pb-20 sm:pb-24 pt-14 sm:pt-16">
         {/* Back button */}
         <Reveal>
           <Link

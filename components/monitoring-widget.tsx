@@ -156,19 +156,6 @@ export function MonitoringWidget({
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (forceOpen || !open) return
-
-    function handlePointerDown(e: PointerEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener('pointerdown', handlePointerDown)
-    return () => document.removeEventListener('pointerdown', handlePointerDown)
-  }, [open, forceOpen])
-
-  useEffect(() => {
     if (forceOpen) refresh()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -259,7 +246,7 @@ export function MonitoringWidget({
   const showEmpty = !loading && !error && rows && rows.length === 0
 
   return (
-    <section className={embedded ? 'pb-4' : 'mx-auto max-w-5xl px-4 sm:px-6 pb-4'}>
+    <section className={embedded ? 'pb-4' : 'mx-auto max-w-[76.8rem] px-4 sm:px-6 pb-4'}>
       <div ref={containerRef} className="rounded-2xl border border-[#222222] bg-[#111111] p-3 sm:p-4">
         <div className="flex w-full items-center justify-between gap-2">
           <button

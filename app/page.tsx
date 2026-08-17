@@ -29,7 +29,7 @@ export default function HomePage() {
         <EducationSection />
         <PublicationsSection />
 
-        <section className="mx-auto max-w-5xl px-4 sm:px-6 py-4 pb-12 sm:pb-16">
+        <section className="mx-auto max-w-[76.8rem] px-4 sm:px-6 py-4 pb-12 sm:pb-16">
           <div className="rounded-2xl bg-[#1a1a1a] border border-border p-6 sm:p-8">
             <Reveal className="mb-8 flex items-end justify-between">
               <h2 className="text-base font-medium uppercase tracking-widest text-muted-foreground">

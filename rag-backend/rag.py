@@ -25,7 +25,7 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_SECRET_KEY = os.environ.get("SUPABASE_SECRET_KEY")
 
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
-JUDGE_MODEL = 'llama-3.3-70b-versatile'
+JUDGE_MODEL = 'groq/compound'
 groq_client = OpenAI(base_url='https://api.groq.com/openai/v1', api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 

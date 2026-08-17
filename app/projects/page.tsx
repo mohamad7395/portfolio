@@ -15,7 +15,7 @@ export default function ProjectsPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <SiteNav />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 sm:px-6 pb-20 sm:pb-24 pt-14 sm:pt-16">
+      <main className="mx-auto w-full max-w-[76.8rem] flex-1 px-4 sm:px-6 pb-20 sm:pb-24 pt-14 sm:pt-16">
         <Reveal>
           <p className="mb-3 font-mono text-base text-accent">Projects</p>
           <h1 className="text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">

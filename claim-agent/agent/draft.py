@@ -8,8 +8,11 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
-client = OpenAI(api_key=os.environ["GROQ_API_KEY"], base_url="https://api.groq.com/openai/v1")
-MODEL = "llama-3.3-70b-versatile"
+client = OpenAI(
+    api_key=os.environ["GROQ_API_KEY"],
+    base_url="https://api.groq.com/openai/v1",
+)
+MODEL = "openai/gpt-oss-120b"
 
 
 def draft_letter_node(state: dict) -> dict:

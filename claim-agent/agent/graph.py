@@ -40,12 +40,18 @@ class ClaimState(TypedDict):
     letter: Optional[str]
     amount: Optional[int]
     final_letter: Optional[str]
+    last_question: Optional[str]
+    facts_confirmed: Optional[bool]
+
 
 
 from openai import OpenAI
 import os
-client = OpenAI(api_key=os.environ["GROQ_API_KEY"], base_url="https://api.groq.com/openai/v1")
-MODEL = "llama-3.3-70b-versatile"
+client = OpenAI(
+    api_key=os.environ["GROQ_API_KEY"],
+    base_url="https://api.groq.com/openai/v1",
+)
+MODEL = "openai/gpt-oss-120b"
 
 
 
@@ -57,37 +63,63 @@ def rule_gate_node(state: ClaimState) -> dict:
     result = gate(state["facts"])
     update = {"gate_result": result}
 
-    if result.blocked:
-        writer({"type": "gate_thinking", "detail": f"blocked: {result.reason}"})
-    else:
-        writer({"type": "gate_thinking", "detail": "rule gate passed, calculating compensation..."})
+    if not result.blocked:
         facts = state["facts"]
-
-        distance = great_circle_km(facts.origin, facts.destination)
-        is_eu = intra_eu(facts.origin, facts.destination)
-        band = band_for(distance, is_eu)
-
-        writer({"type": "gate_thinking",
-                "detail": f"distance {facts.origin}-{facts.destination}: {distance:.0f} km, intra-EU261: {is_eu}"})
-        writer({"type": "gate_thinking", "detail": f"Article 7 band: EUR {band}"})
-
-        amount = amount_for(facts.origin, facts.destination, facts.reroute_arrive_late_hours)
-        if amount != band:
-            writer({"type": "gate_thinking", "detail": f"50% reduction applied (fast reroute): EUR {amount}"})
-
-        update["amount"] = amount
+        try:
+            distance = great_circle_km(facts.origin, facts.destination)
+            is_eu = intra_eu(facts.origin, facts.destination)
+            band = band_for(distance, is_eu)
+            writer({"type": "gate_thinking", "detail": f"distance {facts.origin}-{facts.destination}: {distance:.0f} km, intra-EU261: {is_eu}"})
+            writer({"type": "gate_thinking", "detail": f"Article 7 band: EUR {band}"})
+            amount = amount_for(facts.origin, facts.destination, facts.reroute_arrive_late_hours)
+            update["amount"] = amount
+        except KeyError:
+            writer({"type": "gate_thinking", "detail": "couldn't resolve one of the airport codes"})
+            update["gate_result"] = GateResult(
+                blocked=True,
+                reason="Could not identify one of the airports from your description. Please provide the specific airport (e.g. Tokyo Narita/NRT, not just 'Tokyo')."
+            )
 
     return update
 
 def ask_clarification_node(state: ClaimState) -> dict:
-    question = f"Still need: {', '.join(state['missing_fields'])}. Can you provide that?"
+    field_prompts = {
+        "origin": "departure airport (3-letter code, e.g. CGN, or the airport name)",
+        "destination": "arrival airport (3-letter code, e.g. LHR, or the airport name)",
+        "notice_days": "how many days before departure were you told",
+        "stated_cause": "what reason did the airline give",
+        "claim_type": "was it a delay or a cancellation",
+    }
+    asks = [field_prompts.get(f, f) for f in state["missing_fields"]]
+    question = "I still need: " + "; ".join(asks) + ". Can you provide that?"
+
+    writer = get_stream_writer()
+    writer({"type": "clarification_asked", "detail": question})
+
     answer = interrupt(question)
     return {
         "raw_input": answer,
+        "last_question": question,
         "clarification_attempts": state.get("clarification_attempts", 0) + 1,
     }
 
+def confirm_facts_node(state: ClaimState) -> dict:
+    facts = state["facts"]
+    summary = (
+        f"Please confirm: {facts.claim_type} from {facts.origin} to {facts.destination}, "
+        f"{f'{facts.notice_days} days notice' if facts.notice_days is not None else ''}"
+        f"{f', delay of {facts.delay_hours}h' if facts.delay_hours is not None else ''}, "
+        f"cause: {facts.stated_cause or 'not specified'}. "
+        f"Is this correct? Reply 'yes' or tell me what to fix."
+    )
+    answer = interrupt(summary)
 
+    if answer.strip().lower() in ("yes", "y", "correct", "confirmed"):
+        return {"facts_confirmed": True}
+    else:
+        return {"facts_confirmed": False, "raw_input": answer}
+
+    
 def respond_node(state: ClaimState) -> dict:
     if state["missing_fields"]:
         return {"response": f"Still need: {', '.join(state['missing_fields'])}"}
@@ -123,6 +155,8 @@ def route(state: ClaimState) -> str:
             decision = "respond"
         else:
             decision = "ask_clarification"
+    elif not state.get("facts_confirmed"):
+        decision = "extract_facts" if state.get("facts_confirmed") is False else "confirm_facts"
     elif state["gate_result"] is None:
         decision = "rule_gate"
     elif not state["gate_result"].blocked and state["extraordinary"] is None:
@@ -134,7 +168,7 @@ def route(state: ClaimState) -> str:
 
     writer({"type": "route_decision", "detail": f"router -> {decision}"})
     print(f"[router] missing={state['missing_fields']} gate={state['gate_result']} "
-          f"extraordinary={state['extraordinary']} -> {decision}")
+          f"extraordinary={state['extraordinary']} confirmed={state.get('facts_confirmed')} -> {decision}")
     return decision
 
 
@@ -142,6 +176,7 @@ def build_graph():
     g = StateGraph(ClaimState)
 
     g.add_node("extract_facts", extract_facts_node)
+    g.add_node("confirm_facts", confirm_facts_node)   # <- this line, make sure it's here
     g.add_node("rule_gate", rule_gate_node)
     g.add_node("judge_extraordinary", judge_extraordinary_node)
     g.add_node("ask_clarification", ask_clarification_node)
@@ -150,13 +185,15 @@ def build_graph():
 
     g.set_entry_point("extract_facts")
 
-    for node in ("extract_facts", "rule_gate", "judge_extraordinary", "draft_letter"):
+    for node in ("extract_facts", "confirm_facts", "rule_gate", "judge_extraordinary", "draft_letter"):
         g.add_conditional_edges(node, route, {
             "rule_gate": "rule_gate",
+            "confirm_facts": "confirm_facts",
             "judge_extraordinary": "judge_extraordinary",
             "ask_clarification": "ask_clarification",
             "draft_letter": "draft_letter",
             "respond": "respond",
+            "extract_facts": "extract_facts",
         })
 
     g.add_edge("ask_clarification", "extract_facts")
@@ -179,6 +216,7 @@ if __name__ == "__main__":
         "extraordinary_reason": None,
         "response": None,
         "clarification_attempts": 0,
+        "facts_confirmed": None,
     }, config=config)
 
     while "__interrupt__" in result:

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Send } from 'lucide-react'
+import { ChevronDown, Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Message = {
@@ -16,6 +16,15 @@ const STARTER_PROMPTS = [
 ]
 
 const CHAT_API_URL = 'https://monfared.dev/api/chat'
+
+function PulsingDot() {
+  return (
+    <span className="relative flex size-2">
+      <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#3b82f6] opacity-75" />
+      <span className="relative inline-flex size-2 rounded-full bg-[#3b82f6]" />
+    </span>
+  )
+}
 
 export function ChatSection({
   forceOpen = false,
@@ -35,21 +44,6 @@ export function ChatSection({
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, loading])
-
-  // Collapse the panel whenever a click lands outside of it, regardless of
-  // whether there's already a conversation in it.
-  useEffect(() => {
-    if (forceOpen || !open) return
-
-    function handlePointerDown(e: PointerEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener('pointerdown', handlePointerDown)
-    return () => document.removeEventListener('pointerdown', handlePointerDown)
-  }, [open, forceOpen])
 
   useEffect(() => {
     return () => {
@@ -113,9 +107,30 @@ export function ChatSection({
     sendMessage(input)
   }
 
+  function handleToggle() {
+    if (forceOpen) return
+    setOpen((prev) => !prev)
+  }
+
   return (
-    <section className={embedded ? 'pb-4' : 'mx-auto max-w-5xl px-4 sm:px-6 pb-4'}>
+    <section className={embedded ? 'pb-4' : 'mx-auto max-w-[76.8rem] px-4 sm:px-6 pb-4'}>
       <div ref={containerRef} className="rounded-2xl border border-border bg-[#1a1a1a] p-3 sm:p-4">
+        <div className="flex w-full items-center justify-between gap-2 pb-3">
+          <button
+            type="button"
+            onClick={handleToggle}
+            className={cn('flex flex-1 items-center gap-2.5 text-left', forceOpen && 'cursor-default')}
+          >
+            <PulsingDot />
+            <span className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Ask Me About My Background</span>
+          </button>
+          {!forceOpen && (
+            <button type="button" onClick={handleToggle} aria-label={open ? 'Collapse chat' : 'Expand chat'}>
+              <ChevronDown className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')} />
+            </button>
+          )}
+        </div>
+
         <div
           className={cn(
             'grid transition-[grid-template-rows] duration-300 ease-in-out',

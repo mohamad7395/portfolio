@@ -23,7 +23,7 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-      <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
+      <nav className="mx-auto flex h-16 max-w-[76.8rem] items-center justify-between px-4 sm:px-6">
         <Link
           href="/"
           className="font-mono text-base tracking-tight text-foreground transition-colors hover:text-accent"
@@ -65,7 +65,7 @@ export function SiteNav() {
       {/* Mobile dropdown */}
       {open && (
         <div className="sm:hidden border-t border-border/60 bg-background/95 backdrop-blur-md">
-          <ul className="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1">
+          <ul className="mx-auto max-w-[76.8rem] flex flex-col px-4 py-3 gap-1">
             {links.map((link) => (
               <li key={link.href}>
                 <Link
