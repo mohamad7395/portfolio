@@ -15,7 +15,7 @@ class ClaimRequest(BaseModel):
 from fastapi.responses import StreamingResponse
 import json
 
-@app.post("/claim")
+@app.post("/claim/stream")
 async def stream_claim(req: ClaimRequest):
     thread_id = req.thread_id or str(uuid.uuid4())
     config = {"configurable": {"thread_id": thread_id}}
