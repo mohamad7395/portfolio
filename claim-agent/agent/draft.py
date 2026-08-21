@@ -15,23 +15,34 @@ client = OpenAI(base_url='https://openrouter.ai/api/v1', api_key=OPENROUTER_API_
 
 
 def draft_letter_node(state: dict) -> dict:
+    writer = get_stream_writer()
     facts = state["facts"]
     amount = state["amount"]
+    extraordinary_reason = state.get("extraordinary_reason")
 
-    # print(f"[draft] writing letter — {facts.claim_type}, EUR {amount}, {facts.origin}->{facts.destination}")
+    writer({"type": "draft_thinking", "detail": "drafting your claim letter..."})
+    print(f"[draft] writing letter — {facts.claim_type}, EUR {amount}, {facts.origin}->{facts.destination}")
 
-    prompt = f"""Write a short, formal compensation claim letter to an airline.
+    prompt = f"""Write a short, formal compensation claim email to an airline. no fileds for name, address,
 
 Facts:
 - Flight: {facts.origin} to {facts.destination}
 - Type of disruption: {facts.claim_type}
 - Notice given: {facts.notice_days} days (if cancellation)
 - Delay: {facts.delay_hours} hours (if delay)
+- Stated cause: {facts.stated_cause or "not specified"}
 - Compensation owed: EUR {amount}
 
+The airline may attempt to claim "extraordinary circumstances" (Article 5(3))
+to avoid paying. Preemptively address this: {extraordinary_reason or "the cause does not qualify as extraordinary circumstances under the regulation"}.
+Include this as a specific point in the letter, showing you've already
+anticipated and rebutted that defense — this makes the letter harder to
+dispute.
+
 Cite Regulation (EC) 261/2004, Article 5 (cancellation) or Article 6 (delay),
-and Article 7 (compensation amount) as relevant. Keep it under 200 words,
-polite but firm, and ask for payment within 14 days."""
+and Article 7 (compensation amount) as relevant. Keep it under 220 words,
+polite but firm, and ask for payment within 14 days.
+ """
 
     resp = client.chat.completions.create(
         model=MODEL,
@@ -39,5 +50,5 @@ polite but firm, and ask for payment within 14 days."""
         messages=[{"role": "user", "content": prompt}],
     )
     letter = resp.choices[0].message.content
-    # print(f"[draft] letter written ({len(letter)} chars)")
+    print(f"[draft] letter written ({len(letter)} chars)")
     return {"letter": letter}
