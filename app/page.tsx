@@ -21,9 +21,9 @@ export default function HomePage() {
       <SiteNav />
       <main className="flex-1">
         <Hero />
-        <ChatSection />
-        <MonitoringWidget />
-        <ClaimAgent />
+        <ChatSection forceOpen />
+        <MonitoringWidget forceOpen />
+        <ClaimAgent forceOpen />
 
         <ExperienceSection />
         <EducationSection />

@@ -39,7 +39,7 @@ export function ChatSection({
   const containerRef = useRef<HTMLDivElement>(null)
   const streamTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const expanded = forceOpen || open || loading || streaming
+  const expanded = open || loading || streaming
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -108,7 +108,6 @@ export function ChatSection({
   }
 
   function handleToggle() {
-    if (forceOpen) return
     setOpen((prev) => !prev)
   }
 
@@ -119,16 +118,14 @@ export function ChatSection({
           <button
             type="button"
             onClick={handleToggle}
-            className={cn('flex flex-1 items-center gap-2.5 text-left', forceOpen && 'cursor-default')}
+            className="flex flex-1 items-center gap-2.5 text-left"
           >
             <PulsingDot />
             <span className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Ask Me About My Background</span>
           </button>
-          {!forceOpen && (
-            <button type="button" onClick={handleToggle} aria-label={open ? 'Collapse chat' : 'Expand chat'}>
-              <ChevronDown className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')} />
-            </button>
-          )}
+          <button type="button" onClick={handleToggle} aria-label={open ? 'Collapse chat' : 'Expand chat'}>
+            <ChevronDown className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')} />
+          </button>
         </div>
 
         <div

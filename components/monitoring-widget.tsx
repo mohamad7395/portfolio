@@ -212,7 +212,6 @@ export function MonitoringWidget({
   }
 
   function handleToggle() {
-    if (forceOpen) return
     setOpen((prev) => !prev)
     if (!fetched) refresh()
   }
@@ -252,7 +251,7 @@ export function MonitoringWidget({
           <button
             type="button"
             onClick={handleToggle}
-            className={cn('flex flex-1 items-center gap-2.5 text-left', forceOpen && 'cursor-default')}
+            className="flex flex-1 items-center gap-2.5 text-left"
           >
             <PulsingDot />
             <span className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
@@ -271,13 +270,11 @@ export function MonitoringWidget({
             >
               <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
             </button>
-            {!forceOpen && (
-              <button type="button" onClick={handleToggle} aria-label={open ? 'Collapse metrics' : 'Expand metrics'}>
-                <ChevronDown
-                  className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
-                />
-              </button>
-            )}
+            <button type="button" onClick={handleToggle} aria-label={open ? 'Collapse metrics' : 'Expand metrics'}>
+              <ChevronDown
+                className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
+              />
+            </button>
           </div>
         </div>
 

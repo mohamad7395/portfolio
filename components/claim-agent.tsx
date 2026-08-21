@@ -45,6 +45,13 @@ const TRACKABLE_NODES: NodeId[] = [
 
 const CLAIM_API_URL = 'https://monfared.dev/api/claim/stream'
 
+const EXAMPLE_PROMPTS = [
+  'My flight was cancelled with 2h notice, technical fault',
+  'My flight was delayed 5h due to a bird strike',
+  'I was denied boarding despite having a valid ticket',
+  'Flight cancelled night before, no cause given',
+]
+
 
 const idleStatus: Record<NodeId, NodeStatus> = Object.fromEntries(
   TRACKABLE_NODES.map((id) => [id, 'idle']),
@@ -221,8 +228,8 @@ function PipelineGraph({ status }: { status: Record<NodeId, NodeStatus> }) {
   )
 }
 
-export function ClaimAgent() {
-  const [open, setOpen] = useState(false)
+export function ClaimAgent({ forceOpen = false }: { forceOpen?: boolean } = {}) {
+  const [open, setOpen] = useState(forceOpen)
   const [input, setInput] = useState('')
   const [running, setRunning] = useState(false)
   const [threadId, setThreadId] = useState<string | null>(null)
@@ -231,7 +238,6 @@ export function ClaimAgent() {
   const [clarification, setClarification] = useState<string | null>(null)
   const [clarificationInput, setClarificationInput] = useState('')
   const [result, setResult] = useState<ClaimResult | null>(null)
-  const [letterOpen, setLetterOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -245,7 +251,6 @@ export function ClaimAgent() {
     setLogs([])
     setResult(null)
     setClarification(null)
-    setLetterOpen(false)
     setThreadId(null)
     pendingRef.current = { ...emptyPending }
   }
@@ -484,6 +489,21 @@ export function ClaimAgent() {
               </button>
             </form>
 
+            {!hasStarted && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {EXAMPLE_PROMPTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => setInput(prompt)}
+                    className="rounded-full border border-[#2a2a2a] bg-[#161616] px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-[#3a3a3a] hover:text-foreground"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {hasStarted && (
               <div className="mt-4 grid gap-4 lg:grid-cols-[35%_1fr]">
                 {/* Pipeline graph */}
@@ -538,18 +558,20 @@ export function ClaimAgent() {
 
                   {result && (
                     <div className="rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-4">
-                      <span
-                        className={cn(
-                          'inline-flex items-center rounded-full px-2.5 py-1 text-sm font-medium',
-                          result.eligible ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400',
-                        )}
-                      >
-                        {result.eligible ? 'Eligible' : 'Not eligible'}
-                      </span>
+                      <div className="flex items-center justify-between gap-3">
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2.5 py-1 text-sm font-medium',
+                            result.eligible ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400',
+                          )}
+                        >
+                          {result.eligible ? 'Eligible' : 'Not eligible'}
+                        </span>
 
-                      {result.eligible && result.amount != null && (
-                        <p className="mt-3 text-4xl font-semibold text-white">€{result.amount}</p>
-                      )}
+                        {result.eligible && result.amount != null && (
+                          <p className="text-2xl font-semibold text-white">€{result.amount}</p>
+                        )}
+                      </div>
 
                       {result.reasoning && (
                         <p className="mt-3 text-pretty text-base leading-relaxed text-muted-foreground">{result.reasoning}</p>
@@ -557,33 +579,44 @@ export function ClaimAgent() {
 
                       {result.letter && (
                         <div className="mt-4 border-t border-[#2a2a2a] pt-3">
-                          <button
-                            type="button"
-                            onClick={() => setLetterOpen((v) => !v)}
-                            className="flex items-center gap-1.5 text-sm font-medium text-accent transition-opacity hover:opacity-75"
-                          >
-                            <ChevronDown className={cn('size-3.5 transition-transform duration-200', letterOpen && 'rotate-180')} />
-                            View Claim Letter
-                          </button>
+                          <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                            Claim Letter
+                          </p>
 
                           <div
-                            className={cn(
-                              'grid transition-[grid-template-rows] duration-300 ease-in-out',
-                              letterOpen ? 'grid-rows-[1fr] mt-3' : 'grid-rows-[0fr]',
-                            )}
+                            className="rounded-xl border-t-[3px] p-5"
+                            style={{
+                              backgroundColor: '#f8f8f8',
+                              borderTopColor: '#3b82f6',
+                              boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
+                            }}
                           >
-                            <div className="overflow-hidden">
-                              <div className="rounded-lg border border-[#2a2a2a] bg-[#0d0d0d] p-3">
-                                <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{result.letter}</p>
-                                <button
-                                  type="button"
-                                  onClick={handleCopyLetter}
-                                  className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                                >
-                                  {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-                                  {copied ? 'Copied' : 'Copy'}
-                                </button>
-                              </div>
+                            <div className="font-serif text-[15px] text-[#111111]">
+                              {result.letter
+                                .split(/\n{2,}/)
+                                .filter(Boolean)
+                                .map((para, i) => (
+                                  <p
+                                    key={i}
+                                    className={cn(
+                                      'whitespace-pre-wrap text-left leading-[1.8] [text-indent:1.25em]',
+                                      i > 0 && 'mt-4',
+                                    )}
+                                  >
+                                    {para}
+                                  </p>
+                                ))}
+                            </div>
+
+                            <div className="mt-4 flex justify-end">
+                              <button
+                                type="button"
+                                onClick={handleCopyLetter}
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#d0d0d0] bg-transparent px-2.5 py-1 text-sm text-[#444444] transition-colors hover:border-[#111111] hover:text-[#111111]"
+                              >
+                                {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                                {copied ? 'Copied' : 'Copy Letter'}
+                              </button>
                             </div>
                           </div>
                         </div>
