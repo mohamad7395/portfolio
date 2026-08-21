@@ -22,7 +22,7 @@ export default function HomePage() {
       <main className="flex-1">
         <Hero />
         <ChatSection forceOpen />
-        <MonitoringWidget forceOpen />
+        <MonitoringWidget />
         <ClaimAgent forceOpen />
 
         <ExperienceSection />
