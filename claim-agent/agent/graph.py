@@ -47,11 +47,9 @@ class ClaimState(TypedDict):
 
 from openai import OpenAI
 import os
-client = OpenAI(
-    api_key=os.environ["GROQ_API_KEY"],
-    base_url="https://api.groq.com/openai/v1",
-)
-MODEL = "openai/gpt-oss-120b"
+OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
+MODEL = 'meta-llama/llama-3.3-70b-instruct'
+client = OpenAI(base_url='https://openrouter.ai/api/v1', api_key=OPENROUTER_API_KEY) if OPENROUTER_API_KEY else None
 
 
 

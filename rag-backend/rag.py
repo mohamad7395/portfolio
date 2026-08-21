@@ -24,9 +24,9 @@ NVIDIA_MODEL = os.environ.get("NVIDIA_MODEL", config.generation.nvidia_model_def
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_SECRET_KEY = os.environ.get("SUPABASE_SECRET_KEY")
 
-GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
-JUDGE_MODEL = 'groq/compound'
-groq_client = OpenAI(base_url='https://api.groq.com/openai/v1', api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
+JUDGE_MODEL = 'meta-llama/llama-3.3-70b-instruct'
+judge_client = OpenAI(base_url='https://openrouter.ai/api/v1', api_key=OPENROUTER_API_KEY) if OPENROUTER_API_KEY else None
 
 
 print(SUPABASE_URL, SUPABASE_SECRET_KEY)
@@ -139,8 +139,8 @@ def is_refusal(answer):
     return any(phrase in lowered for phrase in UNANSWERABLE_PHRASES)
 
 def judge_faithfulness(question, context, answer):
-    if groq_client is None:
-        print('Groq clinet is none')
+    if judge_client is None:
+        print('Judge client is none')
         return None
     try:
         prompt = (
@@ -155,7 +155,7 @@ def judge_faithfulness(question, context, answer):
             "0   - Fabricated, not grounded in the context at all\n\n"
             "Respond with ONLY a number between 0 and 100."
         )
-        response = groq_client.chat.completions.create(
+        response = judge_client.chat.completions.create(
             model=JUDGE_MODEL,
             messages=[{'role': 'user', 'content': prompt}],
             temperature=0,
