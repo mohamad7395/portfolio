@@ -63,6 +63,11 @@ REQUIRED_FIELDS = {
     "cancellation": ["claim_type", "origin", "destination", "notice_days", "stated_cause"],
 }
 
+# the system prompt tells the model to omit a field rather than fill it with
+# a placeholder, but that instruction isn't always followed — strip these out
+# so a stray "none" doesn't get treated as a real value downstream.
+PLACEHOLDER_VALUES = {"none", "unknown", "not mentioned", "n/a", "na", "not specified", "not given", "not stated"}
+
 
 def _call_llm(existing: ClaimFacts, user_msg: str) -> dict:
     resp = client.chat.completions.create(
@@ -84,6 +89,11 @@ def _call_llm(existing: ClaimFacts, user_msg: str) -> dict:
 
     if "parameters" in parsed and isinstance(parsed["parameters"], dict):
         parsed = parsed["parameters"]
+
+    parsed = {
+        k: v for k, v in parsed.items()
+        if not (isinstance(v, str) and v.strip().lower() in PLACEHOLDER_VALUES)
+    }
 
     return parsed
 

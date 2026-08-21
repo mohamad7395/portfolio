@@ -21,6 +21,16 @@ async def stream_claim(req: ClaimRequest):
     config = {"configurable": {"thread_id": thread_id}}
 
     if req.thread_id:
+        # a thread_id from before a server restart (e.g. --reload picking up
+        # a file change) has no checkpoint in this process's MemorySaver —
+        # resuming it crashes extract_facts_node on a missing raw_input.
+        if not graph.get_state(config).values:
+            def lost_session_stream():
+                yield f"data: {json.dumps({'type': 'thread', 'thread_id': thread_id})}\n\n"
+                yield f"data: {json.dumps({'type': 'error', 'message': 'Session was reset by the server — please restate your claim.'})}\n\n"
+                yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            return StreamingResponse(lost_session_stream(), media_type="text/event-stream")
+
         from langgraph.types import Command
         stream_input = Command(resume=req.message)
     else:
