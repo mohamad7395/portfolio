@@ -6,7 +6,6 @@ Uses the facts, the amount, and article citations to write it.
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-
 load_dotenv()
 
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
@@ -15,12 +14,10 @@ client = OpenAI(base_url='https://openrouter.ai/api/v1', api_key=OPENROUTER_API_
 
 
 def draft_letter_node(state: dict) -> dict:
-    writer = get_stream_writer()
     facts = state["facts"]
     amount = state["amount"]
     extraordinary_reason = state.get("extraordinary_reason")
 
-    writer({"type": "draft_thinking", "detail": "drafting your claim letter..."})
     print(f"[draft] writing letter — {facts.claim_type}, EUR {amount}, {facts.origin}->{facts.destination}")
 
     prompt = f"""Write a short, formal compensation claim email to an airline. no fileds for name, address,
