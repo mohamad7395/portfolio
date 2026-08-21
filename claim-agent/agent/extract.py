@@ -27,17 +27,25 @@ states it. Do not include a field with a placeholder value like "none",
 "unknown", or "not mentioned" — omit the field entirely instead.
 
 claim_type must be one of: delay, cancellation, denied_boarding, downgrading,
-connection, package, other. Use "other" if it doesn't clearly fit.
+connection, package, other. Use "other" if it doesn't clearly fit. If the
+message doesn't mention the type of disruption at all, omit this field
+rather than guessing "other".
 
-origin/destination should be IATA airport codes if the user gives city or
-airport names, convert to the 3-letter IATA code you're confident about.
-If you're not confident, leave them out.
-For cities with multiple major airports (e.g. Tokyo, Paris, London, New York), if the user doesn't specify which one, leave origin/destination blank 
-rather than guessing a city code.
+origin/destination must be real 3-letter IATA AIRPORT codes. Convert city
+names to their main international airport code, even if the city has
+multiple airports — always pick the largest/most common one:
+  Paris -> CDG, London -> LHR, Tokyo -> NRT, New York -> JFK, Milan -> MXP,
+  Berlin -> BER, Cologne -> CGN, Frankfurt -> FRA, Amsterdam -> AMS,
+  Munich -> MUC, Madrid -> MAD, Barcelona -> BCN, Vienna -> VIE.
+If you are not confident which airport the user means at all, make your
+best guess with the primary/largest airport for that city rather than
+leaving the field blank — the user will get a chance to correct it.
+If a city has no major commercial airport (e.g. Bonn) and the user hasn't
+clarified, leave the field out.
+
 Example: "My flight was delayed" (no cause mentioned) -> do NOT set
 stated_cause at all. Only set it if the user actually names a reason
 (weather, technical fault, strike, etc).
-
 """
 
 EXTRACT_TOOL = {
@@ -72,7 +80,12 @@ def _call_llm(existing: ClaimFacts, user_msg: str) -> dict:
         tool_choice={"type": "function", "function": {"name": "record_claim_facts"}},
     )
     args = resp.choices[0].message.tool_calls[0].function.arguments
-    return json.loads(args)
+    parsed = json.loads(args)
+
+    if "parameters" in parsed and isinstance(parsed["parameters"], dict):
+        parsed = parsed["parameters"]
+
+    return parsed
 
 
 def _missing_fields(facts: ClaimFacts) -> list[str]:
@@ -95,15 +108,29 @@ def _missing_fields(facts: ClaimFacts) -> list[str]:
 
 def extract_facts_node(state: dict) -> dict:
     existing = state.get("facts") or ClaimFacts()
-    question_context = state.get("last_question")
+    missing_field_names = state.get("missing_field_names")
     user_msg = state["raw_input"]
-    if question_context:
-        user_msg = f"(You just asked: {question_context})\nUser's answer: {user_msg}"
+    print(f"[extract_facts] missing_field_names from state: {state.get('missing_field_names')}")
+
+    if missing_field_names:
+        user_msg = (
+            f"You specifically asked the user for these fields: {', '.join(missing_field_names)}.\n"
+            f"The user's reply is: \"{user_msg}\"\n"
+            f"Map their reply to the specific field(s) you asked about. If their reply "
+            f"only makes sense as an answer to ONE of the fields you asked for, only fill in that one."
+        )
 
     new_data = _call_llm(existing, user_msg)
 
     merged = existing.model_dump()
-    merged.update({k: v for k, v in new_data.items() if v is not None})
+    is_correction = state.get("facts_confirmed") is False
+
+    for k, v in new_data.items():
+        if v is None:
+            continue
+        if merged.get(k) is None or is_correction:
+            merged[k] = v
+
     facts = ClaimFacts.model_validate(merged)
 
     return {"facts": facts, "missing_fields": _missing_fields(facts), "facts_confirmed": None}

@@ -30,6 +30,7 @@ async def stream_claim(req: ClaimRequest):
             "retrieved": [], "extraordinary": None, "extraordinary_reason": None,
             "response": None, "clarification_attempts": 0, "last_question": None,
             "letter": None, "amount": None, "final_letter": None,
+            "missing_field_names": None,
         }
 
     def event_stream():

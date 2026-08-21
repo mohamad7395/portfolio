@@ -42,6 +42,7 @@ class ClaimState(TypedDict):
     final_letter: Optional[str]
     last_question: Optional[str]
     facts_confirmed: Optional[bool]
+    missing_field_names: Optional[list]
 
 
 
@@ -50,7 +51,6 @@ import os
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 MODEL = 'meta-llama/llama-3.3-70b-instruct'
 client = OpenAI(base_url='https://openrouter.ai/api/v1', api_key=OPENROUTER_API_KEY) if OPENROUTER_API_KEY else None
-
 
 
 from langgraph.config import get_stream_writer
@@ -82,22 +82,25 @@ def rule_gate_node(state: ClaimState) -> dict:
 
 def ask_clarification_node(state: ClaimState) -> dict:
     field_prompts = {
-        "origin": "departure airport (3-letter code, e.g. CGN, or the airport name)",
-        "destination": "arrival airport (3-letter code, e.g. LHR, or the airport name)",
+        "origin": "departure airport",
+        "destination": "arrival airport",
         "notice_days": "how many days before departure were you told",
         "stated_cause": "what reason did the airline give",
         "claim_type": "was it a delay or a cancellation",
     }
-    asks = [field_prompts.get(f, f) for f in state["missing_fields"]]
+    missing = state["missing_fields"]
+    asks = [field_prompts.get(f, f) for f in missing]
     question = "I still need: " + "; ".join(asks) + ". Can you provide that?"
 
     writer = get_stream_writer()
     writer({"type": "clarification_asked", "detail": question})
 
     answer = interrupt(question)
+    print(f"[ask_clarification] missing_fields from state: {state['missing_fields']}")
     return {
         "raw_input": answer,
         "last_question": question,
+        "missing_field_names": missing,   # NEW: explicit list, not just text
         "clarification_attempts": state.get("clarification_attempts", 0) + 1,
     }
 
