@@ -33,3 +33,25 @@ class ClaimFacts(BaseModel):
 class GateResult(BaseModel):
     blocked: bool
     reason: Optional[str] = None
+
+
+def default_claim_state(raw_input: str) -> dict:
+    """The full, fresh state for a brand-new conversation — single source of
+    truth so no caller can start a claim with a missing or stale key."""
+    return {
+        "raw_input": raw_input,
+        "facts": None,
+        "missing_fields": [],
+        "gate_result": None,
+        "retrieved": [],
+        "extraordinary": None,
+        "extraordinary_reason": None,
+        "response": None,
+        "clarification_attempts": 0,
+        "letter": None,
+        "amount": None,
+        "final_letter": None,
+        "facts_confirmed": None,
+        "last_question": None,
+        "missing_field_names": None,
+    }

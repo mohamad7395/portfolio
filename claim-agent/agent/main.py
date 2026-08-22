@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import uuid
 
-from agent.graph import build_graph
+from agent.graph import build_graph, prune_stale_threads, touch_thread
+from agent.state import default_claim_state
 
 app = FastAPI()
 graph = build_graph()
@@ -17,8 +18,11 @@ import json
 
 @app.post("/claim/stream")
 async def stream_claim(req: ClaimRequest):
+    prune_stale_threads(graph)
+
     thread_id = req.thread_id or str(uuid.uuid4())
     config = {"configurable": {"thread_id": thread_id}}
+    touch_thread(thread_id)
 
     if req.thread_id:
         # a thread_id from before a server restart (e.g. --reload picking up
@@ -34,14 +38,7 @@ async def stream_claim(req: ClaimRequest):
         from langgraph.types import Command
         stream_input = Command(resume=req.message)
     else:
-        stream_input = {
-            "raw_input": req.message,
-            "facts": None, "missing_fields": [], "gate_result": None,
-            "retrieved": [], "extraordinary": None, "extraordinary_reason": None,
-            "response": None, "clarification_attempts": 0, "last_question": None,
-            "letter": None, "amount": None, "final_letter": None,
-            "missing_field_names": None,
-        }
+        stream_input = default_claim_state(req.message)
 
     def event_stream():
         yield f"data: {json.dumps({'type': 'thread', 'thread_id': thread_id})}\n\n"

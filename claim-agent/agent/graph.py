@@ -13,13 +13,14 @@ waits for a human answer, then loops back into extract_facts. This is
 capped at 3 attempts so a stuck extraction can't loop forever.
 """
 
+import time
 from typing import TypedDict, Optional
 
 from langgraph.graph import StateGraph, END
 from langgraph.types import interrupt, Command
 from langgraph.checkpoint.memory import MemorySaver
 
-from agent.state import ClaimFacts, GateResult
+from agent.state import ClaimFacts, GateResult, default_claim_state
 from agent.extract import extract_facts_node
 from agent.rule_gate import gate
 from agent.calculate import amount_for
@@ -173,6 +174,34 @@ def route(state: ClaimState) -> str:
     return decision
 
 
+THREAD_TTL_SECONDS = 2 * 60 * 60  # long enough for a real back-and-forth, short enough not to leak forever
+_last_seen: dict[str, float] = {}
+
+
+def touch_thread(thread_id: str) -> None:
+    """Call on every request for a thread so prune_stale_threads knows it's still active."""
+    _last_seen[thread_id] = time.monotonic()
+
+
+def prune_stale_threads(graph) -> None:
+    """MemorySaver keeps every checkpoint in-process forever with no eviction —
+    fine for a quick local test, but it grows unbounded over a long-running
+    server's uptime. Sweep out threads nobody has touched in a while."""
+    cutoff = time.monotonic() - THREAD_TTL_SECONDS
+    stale = [tid for tid, seen in _last_seen.items() if seen < cutoff]
+    if not stale:
+        return
+
+    cp = graph.checkpointer
+    for tid in stale:
+        cp.storage.pop(tid, None)
+        for key in [k for k in cp.writes if k[0] == tid]:
+            del cp.writes[key]
+        for key in [k for k in cp.blobs if k[0] == tid]:
+            del cp.blobs[key]
+        _last_seen.pop(tid, None)
+
+
 def build_graph():
     g = StateGraph(ClaimState)
 
@@ -207,18 +236,7 @@ if __name__ == "__main__":
     app = build_graph()
     config = {"configurable": {"thread_id": "test-1"}}
 
-    result = app.invoke({
-        "raw_input": "My flight was cancelled.",
-        "facts": None,
-        "missing_fields": [],
-        "gate_result": None,
-        "retrieved": [],
-        "extraordinary": None,
-        "extraordinary_reason": None,
-        "response": None,
-        "clarification_attempts": 0,
-        "facts_confirmed": None,
-    }, config=config)
+    result = app.invoke(default_claim_state("My flight was cancelled."), config=config)
 
     while "__interrupt__" in result:
         question = result["__interrupt__"][0].value

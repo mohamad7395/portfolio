@@ -50,6 +50,28 @@ JUDGE_TOOL = {
 }
 
 
+def _as_bool(value) -> bool:
+    """The tool schema declares is_extraordinary as a JSON boolean, but the
+    model occasionally emits a stringified "true"/"false" instead — which
+    Python treats as truthy either way, silently flipping the verdict."""
+    if isinstance(value, str):
+        return value.strip().lower() == "true"
+    return bool(value)
+
+
+_retriever: Retriever | None = None
+
+
+def _get_retriever() -> Retriever:
+    """Retriever() loads the sentence-transformer model, FAISS index, and BM25
+    pickle from disk — expensive to redo on every judge call, so load it once
+    and reuse it for the life of the process."""
+    global _retriever
+    if _retriever is None:
+        _retriever = Retriever()
+    return _retriever
+
+
 def _preview(hit: dict) -> dict:
     """Short, clean preview — skip the repeated section header, get to real content."""
     text = hit.get("text", "")
@@ -71,7 +93,7 @@ def judge_extraordinary_node(state: dict) -> dict:
         writer({"type": "judge_thinking", "detail": "no cause stated, skipping judgment"})
         return {"extraordinary": False, "retrieved": []}
 
-    retriever = Retriever()
+    retriever = _get_retriever()
     messages = [
         {"role": "system", "content":
          "Decide if the stated cause is 'extraordinary circumstances' under EU261 Art 5(3). "
@@ -115,12 +137,13 @@ def judge_extraordinary_node(state: dict) -> dict:
 
         elif call.function.name == "record_judgment":
             verdict = json.loads(call.function.arguments)
-            # print(f"[judge] -> record_judgment(is_extraordinary={verdict['is_extraordinary']})")
+            is_extraordinary = _as_bool(verdict["is_extraordinary"])
+            # print(f"[judge] -> record_judgment(is_extraordinary={is_extraordinary})")
             # print(f"[judge]    reasoning: {verdict['reasoning']}")
             writer({"type": "judge_thinking",
-                    "detail": f"verdict: {'extraordinary' if verdict['is_extraordinary'] else 'not extraordinary'} — {verdict['reasoning']}"})
+                    "detail": f"verdict: {'extraordinary' if is_extraordinary else 'not extraordinary'} — {verdict['reasoning']}"})
             return {
-                "extraordinary": verdict["is_extraordinary"],
+                "extraordinary": is_extraordinary,
                 "extraordinary_reason": verdict["reasoning"],
                 "retrieved": [_preview(h) for h in all_hits],
             }

@@ -143,7 +143,12 @@ def extract_facts_node(state: dict) -> dict:
 
     facts = ClaimFacts.model_validate(merged)
 
-    return {"facts": facts, "missing_fields": _missing_fields(facts), "facts_confirmed": None}
+    return {
+        "facts": facts,
+        "missing_fields": _missing_fields(facts),
+        "facts_confirmed": None,
+        "missing_field_names": None,  # consumed — don't let it leak into later, unrelated turns
+    }
 
 
 if __name__ == "__main__":

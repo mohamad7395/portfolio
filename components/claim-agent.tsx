@@ -243,6 +243,7 @@ export function ClaimAgent({ forceOpen = false }: { forceOpen?: boolean } = {}) 
   const containerRef = useRef<HTMLDivElement>(null)
   const logRef = useRef<HTMLDivElement>(null)
   const pendingRef = useRef<PendingOutcome>({ ...emptyPending })
+  const hadErrorRef = useRef(false)
 
   const hasStarted = logs.length > 0 || result !== null || clarification !== null
 
@@ -344,12 +345,16 @@ export function ClaimAgent({ forceOpen = false }: { forceOpen?: boolean } = {}) 
         break
       }
       case 'error': {
+        hadErrorRef.current = true
         pushLog('⚠️', event.message ? `Pipeline error: ${event.message}` : 'Pipeline error.', '#f87171')
         setRunning(false)
         break
       }
       case 'done': {
         finalizePipeline()
+        setRunning(false)
+        if (hadErrorRef.current) break
+
         const p = pendingRef.current
         const eligible = p.gateBlocked === false && p.extraordinary !== true
         setResult({
@@ -358,7 +363,6 @@ export function ClaimAgent({ forceOpen = false }: { forceOpen?: boolean } = {}) 
           reasoning: p.response ?? p.gateReason ?? p.extraordinaryReason ?? '',
           letter: p.letter,
         })
-        setRunning(false)
         break
       }
       default:
@@ -369,6 +373,7 @@ export function ClaimAgent({ forceOpen = false }: { forceOpen?: boolean } = {}) 
   async function streamRequest(message: string, resumeThreadId: string | null) {
     setRunning(true)
     setClarification(null)
+    hadErrorRef.current = false
     markActive('extract_facts')
 
     try {
