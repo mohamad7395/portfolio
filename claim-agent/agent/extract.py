@@ -70,20 +70,36 @@ PLACEHOLDER_VALUES = {"none", "unknown", "not mentioned", "n/a", "na", "not spec
 
 
 def _call_llm(existing: ClaimFacts, user_msg: str) -> dict:
-    resp = client.chat.completions.create(
-        model=MODEL,
-        temperature=0,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": f"Known so far: {existing.model_dump_json(exclude_none=True)}\n\n"
-                           f"Message: {user_msg}",
-            },
-        ],
-        tools=[EXTRACT_TOOL],
-        tool_choice={"type": "function", "function": {"name": "record_claim_facts"}},
-    )
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": f"Known so far: {existing.model_dump_json(exclude_none=True)}\n\n"
+                       f"Message: {user_msg}",
+        },
+    ]
+
+    # forcing tool_choice doesn't guarantee compliance — the provider behind
+    # OpenRouter occasionally refuses to call the tool at all and returns a
+    # 400 ("Tool choice is required, but model did not call a tool")
+    # instead of a real tool call. One retry with a blunter nudge clears
+    # this most of the time; a real extraction failure isn't worth a hard
+    # crash on the user's turn.
+    try:
+        resp = client.chat.completions.create(
+            model=MODEL, temperature=0, messages=messages,
+            tools=[EXTRACT_TOOL],
+            tool_choice={"type": "function", "function": {"name": "record_claim_facts"}},
+        )
+    except Exception as e:
+        print(f"[extract_facts] tool call failed ({e}), retrying once")
+        resp = client.chat.completions.create(
+            model=MODEL, temperature=0,
+            messages=messages + [{"role": "user", "content": "You must call record_claim_facts now with whatever fields you can identify."}],
+            tools=[EXTRACT_TOOL],
+            tool_choice={"type": "function", "function": {"name": "record_claim_facts"}},
+        )
+
     args = resp.choices[0].message.tool_calls[0].function.arguments
     parsed = json.loads(args)
 
