@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import uuid
 
-from agent.graph import build_graph, prune_stale_threads, touch_thread
+from agent.graph import build_graph, get_thread_lock, prune_stale_threads, touch_thread
 from agent.state import default_claim_state
 
 app = FastAPI()
@@ -40,23 +40,37 @@ async def stream_claim(req: ClaimRequest):
     else:
         stream_input = default_claim_state(req.message)
 
+    lock = get_thread_lock(thread_id)
+
     def event_stream():
-        yield f"data: {json.dumps({'type': 'thread', 'thread_id': thread_id})}\n\n"
+        if not lock.acquire(blocking=False):
+            # a second request landed on this thread_id while the first is
+            # still running — letting both through would interleave writes
+            # to the same checkpoint and corrupt this conversation's state
+            yield f"data: {json.dumps({'type': 'thread', 'thread_id': thread_id})}\n\n"
+            yield f"data: {json.dumps({'type': 'error', 'message': 'Another request for this conversation is already in progress.'})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            return
 
-        for mode, chunk in graph.stream(stream_input, config=config, stream_mode=["updates", "custom"]):
-            if mode == "updates":
-                for node_name, node_output in chunk.items():
-                    if node_name == "__interrupt__":
-                        payload = {"type": "interrupt", "question": chunk[node_name][0].value}
-                    elif node_name == "draft_letter":
-                        payload = {"type": "node_complete", "node": "draft_letter", "output": {"status": "letter drafted"}}
-                    else:
-                        payload = {"type": "node_complete", "node": node_name, "output": _safe(node_output)}
-                    yield f"data: {json.dumps(payload)}\n\n"
-            elif mode == "custom":
-                yield f"data: {json.dumps(chunk)}\n\n"
+        try:
+            yield f"data: {json.dumps({'type': 'thread', 'thread_id': thread_id})}\n\n"
 
-        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            for mode, chunk in graph.stream(stream_input, config=config, stream_mode=["updates", "custom"]):
+                if mode == "updates":
+                    for node_name, node_output in chunk.items():
+                        if node_name == "__interrupt__":
+                            payload = {"type": "interrupt", "question": chunk[node_name][0].value}
+                        elif node_name == "draft_letter":
+                            payload = {"type": "node_complete", "node": "draft_letter", "output": {"status": "letter drafted"}}
+                        else:
+                            payload = {"type": "node_complete", "node": node_name, "output": _safe(node_output)}
+                        yield f"data: {json.dumps(payload)}\n\n"
+                elif mode == "custom":
+                    yield f"data: {json.dumps(chunk)}\n\n"
+
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        finally:
+            lock.release()
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 

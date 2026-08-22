@@ -13,6 +13,7 @@ waits for a human answer, then loops back into extract_facts. This is
 capped at 3 attempts so a stuck extraction can't loop forever.
 """
 
+import threading
 import time
 from typing import TypedDict, Optional
 
@@ -200,6 +201,21 @@ def prune_stale_threads(graph) -> None:
         for key in [k for k in cp.blobs if k[0] == tid]:
             del cp.blobs[key]
         _last_seen.pop(tid, None)
+        _thread_locks.pop(tid, None)
+
+
+_thread_locks: dict[str, threading.Lock] = {}
+_thread_locks_guard = threading.Lock()
+
+
+def get_thread_lock(thread_id: str) -> threading.Lock:
+    """MemorySaver has no protection against two requests racing on the same
+    thread_id's checkpoint — a retried/duplicated request (flaky network,
+    an eager double-submit, a misbehaving extension) can interleave writes
+    and corrupt that conversation's state. One lock per thread serializes
+    that instead."""
+    with _thread_locks_guard:
+        return _thread_locks.setdefault(thread_id, threading.Lock())
 
 
 def build_graph():
