@@ -132,6 +132,15 @@ def extract_facts_node(state: dict) -> dict:
 
     new_data = _call_llm(existing, user_msg)
 
+    # a targeted clarification reply that comes back with none of the fields
+    # we specifically asked for is very likely a flaky tool-call response
+    # from the LLM provider (OpenRouter routes this model across several
+    # backends of varying reliability), not a genuinely unanswerable
+    # question — retry once before giving up and asking the user again.
+    if missing_field_names and not any(f in new_data for f in missing_field_names):
+        print(f"[extract_facts] retry: first pass missed all of {missing_field_names}")
+        new_data = _call_llm(existing, user_msg)
+
     merged = existing.model_dump()
     is_correction = state.get("facts_confirmed") is False
 

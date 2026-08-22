@@ -74,5 +74,6 @@ jobs:
 
 
       - name: Reload services
-        run: ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "pm2 reload portfolio && pm2 restart rag-backend && pm2 reload claim-agent && echo $(git rev-parse HEAD) > ~/portfolio/rag-backend/VERSION"
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "pm2 reload portfolio && pm2 restart rag-backend && pm2 reload claim-agent && echo $(git rev-parse HEAD) > ~/portfolio/rag-backend/VERSION && echo $(git rev-parse HEAD) > ~/portfolio/claim-agent/VERSION"
           sleep 20

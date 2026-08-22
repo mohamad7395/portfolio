@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uuid
@@ -7,6 +9,15 @@ from agent.state import default_claim_state
 
 app = FastAPI()
 graph = build_graph()
+
+VERSION_FILE = Path(__file__).resolve().parent.parent / "VERSION"
+
+
+@app.get("/version")
+def version():
+    if VERSION_FILE.exists():
+        return {"commit": VERSION_FILE.read_text().strip()}
+    return {"commit": None}
 
 
 class ClaimRequest(BaseModel):
