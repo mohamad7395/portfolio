@@ -46,10 +46,10 @@ const TRACKABLE_NODES: NodeId[] = [
 const CLAIM_API_URL = 'https://monfared.dev/api/claim/stream'
 
 const EXAMPLE_PROMPTS = [
-  'My flight from Berlin to Rome was cancelled 2 days before departure, no reason given',
-  'Flight delayed 4 hours from London to Madrid — they said it was a technical issue',
-  'They cancelled my flight the night before with no notice, blamed a crew strike',
-  'My flight from Munich to Lisbon was delayed 3.5 hours, no explanation from the airline',
+  'My flight from Berlin to Rome was cancelled 2 days before departure, the airline said it was a technical fault',
+  'Flight delayed 4 hours from London to Madrid due to a mechanical issue with the aircraft',
+  'They cancelled my flight the night before with no notice, blamed a volcanic ash cloud',
+  'My flight from Munich to Lisbon was delayed 3.5 hours because of a bird strike',
 ]
 
 
